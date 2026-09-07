@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Dashboard\OrganizationController;
 use App\Http\Controllers\Dashboard\OrganizationMemberController;
+use App\Http\Controllers\Dashboard\TeamController;
+use App\Http\Controllers\Dashboard\TeamMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,8 +21,8 @@ Route::get('/', function () {
 })->name('home');
 
 // Auth — Phase A Sprint 1 prerequisite (see _docs/tasks/tasks.md). No public
-// event/team/registration/judging routes are defined anywhere in this file —
-// out of scope for this sprint, see CLAUDE.md and ADR-002.
+// event/registration/judging routes are defined anywhere in this file — out
+// of scope for these sprints, see CLAUDE.md and ADR-002.
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
@@ -49,6 +51,17 @@ Route::middleware('auth')->group(function () {
                 Route::post('/', [OrganizationMemberController::class, 'store'])->name('store');
                 Route::patch('{membership}', [OrganizationMemberController::class, 'update'])->name('update');
                 Route::delete('{membership}', [OrganizationMemberController::class, 'destroy'])->name('destroy');
+            });
+
+        Route::resource('teams', TeamController::class)
+            ->except(['destroy']);
+
+        Route::prefix('teams/{team}/members')
+            ->name('teams.members.')
+            ->group(function () {
+                Route::get('/', [TeamMemberController::class, 'index'])->name('index');
+                Route::post('/', [TeamMemberController::class, 'store'])->name('store');
+                Route::delete('{member}', [TeamMemberController::class, 'destroy'])->name('destroy');
             });
     });
 });

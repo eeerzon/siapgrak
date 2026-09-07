@@ -2,7 +2,7 @@
 
 Intake SEMUA request (bug, fitur, apapun). Diedit manual oleh Ersa saat brief baru masuk, dan oleh Claude saat status kerja berubah.
 
-**Status project:** Sprint 1 (Organization/Tenancy) selesai & terverifikasi — Laravel 12/PHP 8.3 app hidup, 41 test hijau. Belum push ke remote (sudah `git init` + 3 commit lokal).
+**Status project:** Sprint 1 (Organization/Tenancy) + Sprint 2 (Team/School Directory) selesai & terverifikasi — 74 test hijau. Belum push ke remote.
 
 **Roadmap direvisi 2026-09-07 (ADR-002): MVP sekarang "Siapgrak Admin v1"** — sistem internal panitia dari setup event sampai hasil akhir, tanpa satu pun halaman publik. Public site, self-registration peserta, dan integrasi Kreenconnect dipindah ke DEFERRED (tetap ada di blueprint desain, cuma tidak dikerjakan sekarang).
 
@@ -21,7 +21,7 @@ Aturan wajib: setiap sprint dikerjakan sendiri-sendiri, tidak digabung. Instruks
 
 ### Phase A — Admin Foundation
 - [x] **Sprint 1 — Organization / Tenancy** — SELESAI 2026-09-07 (commit `58d9d99`). Auth + Organization + organization_users + tenant isolation policy, 41 test hijau, Pint clean. Detail lengkap ada di laporan sesi (lihat riwayat percakapan Claude Code) — belum ada `status/log.md` terpisah, dipertimbangkan mulai Sprint 2.
-- [ ] Sprint 2 — Team / School Directory — SRS belum ditulis, buat dulu sebelum mulai (lihat CLAUDE.md §Wajib Sebelum Coding Fitur)
+- [x] **Sprint 2 — Team / School Directory** — SELESAI 2026-09-07 (commit lihat git log). SRS: `srs/fr-team-directory.md`. `teams`+`team_members`, `organization_id` nullable di schema tapi wajib di validasi (keputusan eksplisit Ersa, lihat SRS §Keputusan Desain Kritis — "team independen tanpa organisasi" resmi DEFERRED sampai model ownership didesain). 74 test hijau, Pint clean, tenant isolation diverifikasi manual di browser (Outsider User → Team milik user lain = 403, index tidak bocor).
 - [ ] Sprint 3 — Event + Event Category — SRS belum ditulis. **Public Event Page TIDAK termasuk sprint ini** (deferred, lihat di bawah) — cukup CRUD event di dashboard organizer.
 - [ ] **Milestone Phase A:** organizer bisa login → create organization → create event → setup category.
 

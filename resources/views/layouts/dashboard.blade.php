@@ -12,8 +12,12 @@
             <div class="px-4 py-4 text-lg font-semibold text-slate-800">Siapgrak</div>
             <nav class="space-y-1 px-2 pb-4">
                 {{-- Sidebar final CLAUDE.md: Dashboard/Events/Teams/Organization/Settings.
-                     Sprint 1 hanya me-render item yang benar-benar punya route (Organizations) —
-                     Events/Teams/Settings sengaja belum ditambahkan, lihat Final Report Sprint 1. --}}
+                     Hanya item dengan route nyata yang dirender (lihat Sprint 1 & 2 Final
+                     Report) — Events/Settings menyusul begitu sprint-nya punya route. --}}
+                <a href="{{ route('dashboard.teams.index') }}"
+                   class="block rounded px-3 py-2 text-sm font-medium {{ request()->routeIs('dashboard.teams.*') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50' }}">
+                    Teams
+                </a>
                 <a href="{{ route('dashboard.organizations.index') }}"
                    class="block rounded px-3 py-2 text-sm font-medium {{ request()->routeIs('dashboard.organizations.*') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50' }}">
                     Organizations
