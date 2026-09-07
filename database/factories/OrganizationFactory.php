@@ -1,0 +1,33 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Enums\OrganizationType;
+use App\Models\Organization;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+
+/**
+ * @extends Factory<Organization>
+ */
+class OrganizationFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        $name = fake()->unique()->company();
+
+        return [
+            'name' => $name,
+            'slug' => Str::slug($name).'-'.fake()->unique()->numberBetween(1, 999999),
+            'type' => fake()->randomElement(OrganizationType::cases()),
+            'description' => fake()->optional()->sentence(),
+            'email' => fake()->optional()->companyEmail(),
+            'phone' => fake()->optional()->phoneNumber(),
+        ];
+    }
+}
