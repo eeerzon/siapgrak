@@ -2,14 +2,14 @@
 
 Intake SEMUA request (bug, fitur, apapun). Diedit manual oleh Ersa saat brief baru masuk, dan oleh Claude saat status kerja berubah.
 
-**Status project:** Riset & desain selesai. `_docs` baseline v5 lengkap. **Belum ada satu baris kode pun.** Belum push ke remote (sudah `git init` + commit lokal).
+**Status project:** Sprint 1 (Organization/Tenancy) selesai & terverifikasi — Laravel 12/PHP 8.3 app hidup, 41 test hijau. Belum push ke remote (sudah `git init` + 3 commit lokal).
 
 **Roadmap direvisi 2026-09-07 (ADR-002): MVP sekarang "Siapgrak Admin v1"** — sistem internal panitia dari setup event sampai hasil akhir, tanpa satu pun halaman publik. Public site, self-registration peserta, dan integrasi Kreenconnect dipindah ke DEFERRED (tetap ada di blueprint desain, cuma tidak dikerjakan sekarang).
 
-## Blocking Dependency (aktif — harus diselesaikan sebelum Sprint 1)
+## Blocking Dependency
 
-- [ ] **Putuskan strategi auth** untuk organizer/staff/judge. Boleh mulai sederhana dengan Laravel auth biasa dulu, asal arsitektur tidak mengikat terlalu erat ke satu strategi (supaya bisa diganti SSO Kreen Connect nanti tanpa migrasi besar). Lihat Open Question di `srs/fr-organization-tenancy.md`.
-- [ ] **Putuskan platform hosting/runtime** — mempengaruhi `operations/deployment.md` yang masih placeholder.
+- [x] **Strategi auth Sprint 1** — diputuskan sementara: Laravel session auth biasa (register/login/logout/forgot-password, hand-rolled, tidak pakai Breeze/Fortify). Tidak mengunci ke SSO Kreen Connect; migrasi ke SSO nanti hanya perlu ganti layer auth, skema `users`/`organizations` tidak perlu berubah. **Belum final decision dari Ersa** — re-evaluasi kalau SSO Kreen jadi prioritas sebelum Sprint 2+ menambah lebih banyak yang bergantung pada auth ini.
+- [ ] **Putuskan platform hosting/runtime production** — dev lokal sudah jalan (MySQL native Homebrew di Mac Mini, port 8065, DB user `siapgrak_app` scoped — lihat `_credentials/01-infra-local.md`), tapi `operations/deployment.md` masih placeholder untuk production.
 
 **Dicabut dari blocking (ADR-002):** konfirmasi kontrak API Kreenconnect — sekarang tidak menghalangi sprint aktif manapun, cukup relevan lagi saat fase DEFERRED "Kreenconnect Integration" dimulai.
 
@@ -20,7 +20,7 @@ Intake SEMUA request (bug, fitur, apapun). Diedit manual oleh Ersa saat brief ba
 Aturan wajib: setiap sprint dikerjakan sendiri-sendiri, tidak digabung. Instruksi coding harus eksplisit menyebut apa yang TIDAK diimplementasikan di sprint itu. Lihat `quality/definition-of-ready.md` dan Phase Gate Rule di bawah sebelum memulai sprint manapun.
 
 ### Phase A — Admin Foundation
-- [ ] **Sprint 1 — Organization / Tenancy** — SRS sudah siap: `srs/fr-organization-tenancy.md`. Termasuk Auth dasar (login/logout/forgot-password) sebagai prasyarat. **Jangan implement team/event/registration/judging.**
+- [x] **Sprint 1 — Organization / Tenancy** — SELESAI 2026-09-07 (commit `58d9d99`). Auth + Organization + organization_users + tenant isolation policy, 41 test hijau, Pint clean. Detail lengkap ada di laporan sesi (lihat riwayat percakapan Claude Code) — belum ada `status/log.md` terpisah, dipertimbangkan mulai Sprint 2.
 - [ ] Sprint 2 — Team / School Directory — SRS belum ditulis, buat dulu sebelum mulai (lihat CLAUDE.md §Wajib Sebelum Coding Fitur)
 - [ ] Sprint 3 — Event + Event Category — SRS belum ditulis. **Public Event Page TIDAK termasuk sprint ini** (deferred, lihat di bawah) — cukup CRUD event di dashboard organizer.
 - [ ] **Milestone Phase A:** organizer bisa login → create organization → create event → setup category.
