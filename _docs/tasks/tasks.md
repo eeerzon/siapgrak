@@ -2,59 +2,76 @@
 
 Intake SEMUA request (bug, fitur, apapun). Diedit manual oleh Ersa saat brief baru masuk, dan oleh Claude saat status kerja berubah.
 
-**Status project:** Riset & desain selesai (3 dokumen ChatGPT + `_docs` baseline v5 ini). **Belum ada satu baris kode pun.** Belum `git init`.
+**Status project:** Riset & desain selesai. `_docs` baseline v5 lengkap. **Belum ada satu baris kode pun.** Belum push ke remote (sudah `git init` + commit lokal).
 
-## Blocking Dependency (harus diselesaikan sebelum Phase 6)
+**Roadmap direvisi 2026-09-07 (ADR-002): MVP sekarang "Siapgrak Admin v1"** — sistem internal panitia dari setup event sampai hasil akhir, tanpa satu pun halaman publik. Public site, self-registration peserta, dan integrasi Kreenconnect dipindah ke DEFERRED (tetap ada di blueprint desain, cuma tidak dikerjakan sekarang).
 
-- [ ] **Konfirmasi kontrak API Kreenconnect ke tim terkait** — kontrak endpoint di `research/chatgpt-blueprint-v1.md` §69-76 masih proposal ChatGPT, belum diverifikasi terhadap implementasi nyata Kreenconnect. Lihat ADR-001 dan `architecture/integration.md`.
-- [ ] **Putuskan strategi auth**: pakai SSO Kreen Connect existing, atau Laravel auth mandiri? (Open Question di `srs/fr-organization-tenancy.md`)
-- [ ] **Putuskan platform hosting** — mempengaruhi `operations/deployment.md` yang masih placeholder
+## Blocking Dependency (aktif — harus diselesaikan sebelum Sprint 1)
 
-## Roadmap Sprint (dari `research/chatgpt-dev-checklist-migration-routes.md`)
+- [ ] **Putuskan strategi auth** untuk organizer/staff/judge. Boleh mulai sederhana dengan Laravel auth biasa dulu, asal arsitektur tidak mengikat terlalu erat ke satu strategi (supaya bisa diganti SSO Kreen Connect nanti tanpa migrasi besar). Lihat Open Question di `srs/fr-organization-tenancy.md`.
+- [ ] **Putuskan platform hosting/runtime** — mempengaruhi `operations/deployment.md` yang masih placeholder.
 
-**Aturan wajib:** setiap sprint dikerjakan sendiri-sendiri, tidak digabung. Instruksi coding harus eksplisit menyebut apa yang TIDAK diimplementasikan di sprint itu. Lihat `quality/definition-of-ready.md` sebelum memulai sprint manapun, dan Phase Gate Rule di bawah.
+**Dicabut dari blocking (ADR-002):** konfirmasi kontrak API Kreenconnect — sekarang tidak menghalangi sprint aktif manapun, cukup relevan lagi saat fase DEFERRED "Kreenconnect Integration" dimulai.
 
-### Phase 0 — Project Foundation
-- [ ] Sprint 0: Laravel 12 init, PHP 8.3, MySQL config, Auth (login/logout/forgot-password), base layout (Public/Dashboard/Auth), `_docs/` structure (✅ sudah ada per dokumen ini)
+---
 
-### Phase 1 — Organization + Team + Event
-- [ ] **Sprint 1: Organization + tenancy + policy ONLY** — SRS: `srs/fr-organization-tenancy.md` (sudah ditulis, siap dieksekusi). **Jangan implement team/event/registration/judging/ticketing/voting.**
-- [ ] Sprint 2: Team, Team Members, Team Public Page — SRS belum ditulis, buat dulu sebelum mulai (lihat CLAUDE.md §Wajib Sebelum Coding Fitur)
-- [ ] Sprint 3: Event, Event Categories, Public Event Page — SRS belum ditulis
-- [ ] **Milestone: Phase 1 complete** — organizer bisa create org → create event → publish; public bisa lihat event listing
+## ACTIVE — Siapgrak Admin v1
 
-### Phase 2 — Competition Registration
-- [ ] Sprint 4: Registration Draft, Registration Members
-- [ ] Sprint 5: Documents, Submit, Organizer Review
-- [ ] **Milestone: Phase 2 complete** — Siapgrak gantikan Google Form pendaftaran
+Aturan wajib: setiap sprint dikerjakan sendiri-sendiri, tidak digabung. Instruksi coding harus eksplisit menyebut apa yang TIDAK diimplementasikan di sprint itu. Lihat `quality/definition-of-ready.md` dan Phase Gate Rule di bawah sebelum memulai sprint manapun.
 
-### Phase 3 — Competition Operations
-- [ ] Sprint 6: Competition Entry, Competition Number
-- [ ] Sprint 7: Schedule, Check-in, Event Status
-- [ ] **Milestone: Phase 3 complete** — panitia kelola operasional lomba tanpa spreadsheet
+### Phase A — Admin Foundation
+- [ ] **Sprint 1 — Organization / Tenancy** — SRS sudah siap: `srs/fr-organization-tenancy.md`. Termasuk Auth dasar (login/logout/forgot-password) sebagai prasyarat. **Jangan implement team/event/registration/judging.**
+- [ ] Sprint 2 — Team / School Directory — SRS belum ditulis, buat dulu sebelum mulai (lihat CLAUDE.md §Wajib Sebelum Coding Fitur)
+- [ ] Sprint 3 — Event + Event Category — SRS belum ditulis. **Public Event Page TIDAK termasuk sprint ini** (deferred, lihat di bawah) — cukup CRUD event di dashboard organizer.
+- [ ] **Milestone Phase A:** organizer bisa login → create organization → create event → setup category.
 
-### Phase 4 — Judging
-- [ ] Sprint 8: Judge, Round, Criteria
-- [ ] Sprint 9: Assignment, Score Sheet, Save Draft
-- [ ] Sprint 10: Submit, Lock, Revision, Audit
-- [ ] **Milestone: Phase 4 complete** — full digital scoring, judge isolation tegak
+### Phase B — Registration Ops (Admin Entry Mode)
+- [ ] Sprint 4 — Admin Participant Management: `Add Participant/Team`, `Import CSV/Excel`, `Assign Category`, `Roster`, `Documents`, `Status`, `Approval`. **Mode admin-entry saja — panitia yang input/import peserta, BUKAN peserta daftar sendiri.** SRS wajib mendesain `submitted_by` supaya kompatibel dengan self-registration nanti tanpa migrasi skema (lihat ADR-002 §Konsekuensi).
+- [ ] **Milestone Phase B:** panitia bisa kelola seluruh data peserta dari Siapgrak tanpa spreadsheet eksternal, termasuk approval workflow.
 
-### Phase 5 — Results + Public Transparency
-- [ ] Sprint 11: Result Calculator, Ranking
-- [ ] Sprint 12: Awards, Public Result, Publish
-- [ ] **Milestone: Phase 5 complete — MVP cut line.** Siapgrak core sudah viable tanpa Kreenconnect (lihat `research/chatgpt-dev-checklist-migration-routes.md` §121)
+### Phase C — Competition Ops
+- [ ] Sprint 5 — Competition Entry + Competition Number
+- [ ] Sprint 6 — Schedule + Event-day Status
+- [ ] **Milestone Phase C:** panitia kelola operasional lomba (nomor peserta, jadwal, status hari-H) tanpa spreadsheet eksternal.
 
-### Phase 6 — Kreenconnect Integration
-- [ ] ⚠️ **Blocked sampai kontrak API dikonfirmasi** (lihat Blocking Dependency di atas)
-- [ ] Sprint 13: Kreenconnect Client, Ticketing Integration
-- [ ] Sprint 14: Voting Integration, Candidate Mapping, Checkout
-- [ ] **Milestone: Phase 6 complete**
+### Phase D — Judging
+- [ ] Sprint 7 — Judges + Judging Rounds + Criteria
+- [ ] Sprint 8 — Judge Assignment
+- [ ] Sprint 9 — Scoring (Score Sheet, save draft)
+- [ ] Sprint 10 — Submit / Lock / Revision + Audit Trail
+- [ ] **Milestone Phase D:** full digital scoring, judge isolation tegak.
 
-### Phase 7 — Team History + Ecosystem
-- [ ] Belum dipecah jadi sprint detail — lihat `research/chatgpt-dev-checklist-migration-routes.md` §88-92 untuk scope (team/organization profile enhancement, discovery filter, search)
+### Phase E — Results
+- [ ] Sprint 11 — Result Calculator + Ranking
+- [ ] Sprint 12 — Awards + Result Finalization
+- [ ] Sprint 13 — Operational Polish (bug fix, UX gap dari internal testing panitia asli)
+- [ ] **Milestone Phase E — MVP "Siapgrak Admin v1" selesai.** Organizer bisa jalankan alur penuh: Create Event → Setup Category → Input Participant → Review → Competition Number → Schedule → Judges → Criteria → Scoring → Finalize Results. **Semua tanpa satu halaman publik.**
 
-### Phase 8 — Event Command Center
-- [ ] Belum dipecah jadi sprint detail — **jangan dibangun sebelum Phase 1-6 stabil** (lihat `research/chatgpt-dev-checklist-migration-routes.md` §93-95)
+---
+
+## DEFERRED — later, tetap ada di blueprint desain
+
+Detail lengkap tetap tersimpan di `research/chatgpt-blueprint-v1.md` dan `research/chatgpt-dev-checklist-migration-routes.md` — tidak hilang, cuma tidak dikerjakan sekarang. Re-evaluasi urutan ini setelah Phase E (MVP Admin v1) selesai dan sudah divalidasi oleh panitia LKBB asli.
+
+```text
+Public homepage
+Public event discovery
+Public team directory
+Public organization profile
+Public results page
+Participant self-registration (frontend peserta di atas registration engine yang sama)
+Kreenconnect ticketing integration
+Kreenconnect voting integration
+Kreenconnect checkout
+Team ranking ecosystem
+Event Command Center (advanced/live dashboard hari-H)
+```
+
+## Aturan UI Selama Fase Admin-First
+
+- Sidebar dashboard: `Dashboard / Events / Teams / Organization / Settings` — tidak lebih dari ini.
+- Event Workspace: `Overview` + **COMPETITION** (Participants/Categories/Schedule/Judging/Results) + **OPERATIONS** (Documents/Staff) + `Settings`.
+- Menu `Ticketing`/`Voting` **di-hide total, BUKAN "Coming Soon"** — produk Admin v1 harus terasa fokus dan selesai, bukan setengah jadi. Lihat ADR-002.
 
 ## Phase Gate Rule
 

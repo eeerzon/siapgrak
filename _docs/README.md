@@ -1,6 +1,8 @@
 # _docs — Master Index
 
-Siapgrak — platform operasional & ekosistem publik Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tunggal. Belum ada kode; dokumen ini adalah baseline sebelum baris kode fitur pertama ditulis (standar v5, Lapis 1 — 18 file).
+Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tunggal. Belum ada kode; dokumen ini adalah baseline sebelum baris kode fitur pertama ditulis (standar v5, Lapis 1 — 18 file).
+
+**MVP saat ini: "Siapgrak Admin v1"** (ADR-002) — sistem internal panitia, tanpa halaman publik. Public site, self-registration, dan Kreenconnect integration sengaja DEFERRED. Lihat [decisions/adr-002-admin-first-mvp.md](decisions/adr-002-admin-first-mvp.md) dan [tasks/tasks.md](tasks/tasks.md).
 
 **Terakhir diupdate:** 2026-09-07
 
@@ -47,11 +49,12 @@ _docs/
 ├── brd/
 │   └── brd-core.md
 ├── srs/
-│   ├── fr-organization-tenancy.md      (fitur pertama — Phase 1 Sprint 1)
+│   ├── fr-organization-tenancy.md      (fitur pertama — Phase A Sprint 1)
 │   └── nfr.md
 ├── decisions/
 │   ├── README.md
-│   └── adr-001-siapgrak-kreenconnect-boundary.md
+│   ├── adr-001-siapgrak-kreenconnect-boundary.md
+│   └── adr-002-admin-first-mvp.md      (MVP = Admin v1, public/self-registration/Kreenconnect DEFERRED)
 ├── architecture/
 │   ├── system-overview.md
 │   └── integration.md                  (Lapis 2 — dipicu integrasi Kreenconnect)

@@ -1,4 +1,4 @@
-# Design Doc — Organization & Tenancy (Phase 1, Sprint 1)
+# Design Doc — Organization & Tenancy (Phase A, Sprint 1)
 
 **Status:** Draft
 **Author:** Claude (disusun dari riset ChatGPT)

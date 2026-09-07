@@ -9,3 +9,4 @@ Setiap keputusan arsitektur yang **sulit di-reverse**: pilihan database, auth st
 | # | Judul | Status | Tanggal |
 |---|---|---|---|
 | [ADR-001](adr-001-siapgrak-kreenconnect-boundary.md) | Boundary Siapgrak vs Kreenconnect (ticketing/voting via API, bukan native) + non-reuse database `juri` | Accepted | 2026-09-07 |
+| [ADR-002](adr-002-admin-first-mvp.md) | Admin-first MVP — defer public site, self-registration, dan Kreenconnect integration | Accepted | 2026-09-07 |

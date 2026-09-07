@@ -2,9 +2,11 @@ docs_tier: standard
 
 # Siapgrak — Claude Code Instructions
 
-Platform operasional & ekosistem publik untuk Paskibra/LKBB (Lomba Ketangkasan Baris Berbaris) — bagian dari ekosistem Kreen Connect. Laravel 12, PHP 8.3, MySQL 8+, Blade, Alpine.js, Tailwind CSS. Repo tunggal, multi-organizer (shared database, bukan DB terpisah per organizer).
+Platform operasional untuk Paskibra/LKBB (Lomba Ketangkasan Baris Berbaris) — bagian dari ekosistem Kreen Connect. Laravel 12, PHP 8.3, MySQL 8+, Blade, Alpine.js, Tailwind CSS. Repo tunggal, multi-organizer (shared database, bukan DB terpisah per organizer).
 
-**Status saat ini:** riset & desain selesai, **belum ada kode**. Domain `siapgrak.id` belum di-setup. Instruksi coding pertama harus mulai dari Phase 1 Sprint 1 saja (lihat `_docs/tasks/tasks.md`) — jangan "build Siapgrak" sekaligus.
+**MVP saat ini: "Siapgrak Admin v1"** (ADR-002, 2026-09-07) — sistem internal panitia dari setup event sampai hasil akhir, **tanpa satu pun halaman publik**. Public site, participant self-registration, dan integrasi Kreenconnect (ticketing/voting) sengaja DEFERRED — tetap ada di desain (`_docs/research/`), tidak dikerjakan sekarang.
+
+**Status saat ini:** riset & desain selesai, **belum ada kode**. Domain `siapgrak.id` belum di-setup. Instruksi coding pertama harus mulai dari Sprint 1 saja (lihat `_docs/tasks/tasks.md`) — jangan "build Siapgrak" sekaligus.
 
 ---
 
@@ -46,6 +48,7 @@ Referensi lengkap: https://github.com/multica-ai/andrej-karpathy-skills
 - **Registration/competition history tidak boleh hilang akibat cascade delete.** Event yang sudah punya registration di-`cancelled`/`archived`, bukan hard delete. Hard delete hanya untuk draft tanpa data turunan.
 - **Roster peserta di-snapshot per registration**, tidak hanya mereferensikan `team_members` — perubahan anggota tim tahun depan tidak boleh mengubah histori tahun sebelumnya.
 - **Organizer A tidak pernah bisa mengakses/mengubah data organizer B** hanya dengan mengganti ID di URL — tenant isolation via Laravel Policy wajib di setiap resource yang punya `organization_id`/`event_id`.
+- **Selama fase Admin v1, tidak ada halaman publik yang dibangun** (event discovery, team/organization profile publik, hasil publik) — kalau ada permintaan yang mengarah ke situ, itu DEFERRED (lihat ADR-002), tanya dulu ke Ersa sebelum mulai, jangan diam-diam dikerjakan karena "kelihatan gampang sekalian".
 
 Setiap Technical Design wajib dicek tidak melanggar bagian ini sebelum coding.
 
@@ -59,10 +62,12 @@ Setiap Technical Design wajib dicek tidak melanggar bagian ini sebelum coding.
 
 ## Aturan Kritis
 
-- **Jangan lompat phase.** Urutan wajib: Foundation → Organization/Team/Event → Registration → Competition Operations → Judging → Results → Kreenconnect Integration → Ecosystem → Command Center. Lihat `_docs/tasks/tasks.md` untuk breakdown sprint. Instruksi coding pertama HARUS dibatasi eksplisit ke satu sprint, contoh lengkap ada di `_docs/research/chatgpt-dev-checklist-migration-routes.md` §"Instruksi Penting untuk Claude/Dev".
+- **Jangan lompat phase.** Urutan aktif (ADR-002): Phase A Admin Foundation → Phase B Registration Ops (admin-entry) → Phase C Competition Ops → Phase D Judging → Phase E Results. Lihat `_docs/tasks/tasks.md` untuk breakdown 13 sprint. Instruksi coding pertama HARUS dibatasi eksplisit ke satu sprint.
+- **Registration Phase B pakai mode admin-entry saja** — panitia yang input/import peserta (`Add Participant/Team`, `Import CSV/Excel`), BUKAN peserta daftar sendiri. Jangan bangun login/forgot-password/onboarding untuk team representative di fase ini — itu DEFERRED.
+- **Sidebar dashboard tetap `Dashboard / Events / Teams / Organization / Settings`** — jangan ditambah menu lain tanpa diminta. Event Workspace: `Overview` + COMPETITION (Participants/Categories/Schedule/Judging/Results) + OPERATIONS (Documents/Staff) + `Settings`. **Menu Ticketing/Voting di-hide total, bukan "Coming Soon".**
 - Semua nama tabel & kolom database **bahasa Inggris**.
 - Field skor pakai `DECIMAL(10,3)`, **jangan pernah FLOAT**.
-- Public URL pakai slug/`public_id`, bukan numeric ID auto-increment (`/events/lkbb-garuda-2026`, bukan `/events/14`).
+- Public URL pakai slug/`public_id`, bukan numeric ID auto-increment — berlaku untuk nanti kalau public site dikerjakan; untuk sekarang dashboard admin cukup pakai route resource biasa (`/dashboard/events/{event}`), tidak perlu prematurely desain slug publik.
 - Jangan reuse database judging system project `juri` (produk pageant terpisah) — pola teknis boleh mirip, skema tetap terpisah sampai benar-benar terbukti identik (lihat ADR-001).
 
 ## Status Update (WAJIB)
