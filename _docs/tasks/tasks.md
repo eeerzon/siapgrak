@@ -6,6 +6,8 @@ Intake SEMUA request (bug, fitur, apapun). Diedit manual oleh Ersa saat brief ba
 
 **Roadmap direvisi 2026-09-07 (ADR-002): MVP sekarang "Siapgrak Admin v1"** — sistem internal panitia dari setup event sampai hasil akhir, tanpa satu pun halaman publik. Public site, self-registration peserta, dan integrasi Kreenconnect dipindah ke DEFERRED (tetap ada di blueprint desain, cuma tidak dikerjakan sekarang).
 
+**🔴 Pembagian kerja tim (2026-09-07):** roadmap sprint di bawah ini sekarang murni **track backend**, dikerjakan tim dev — lihat `BACKEND-HANDOFF.md` (root project) untuk kontrak lengkap. **Track frontend/UI berjalan paralel, terpisah dari nomor sprint di bawah** — lihat `_docs/frontend/frontend-plan.md` (build order sendiri F0-F12, boleh pakai mock data, tidak menunggu sprint backend selesai). Dua track ini disatukan lewat "Backend Data Contract" di frontend-plan.md — begitu backend Sprint-N live, frontend tinggal ganti sumber data tanpa re-desain.
+
 ## Blocking Dependency
 
 - [x] **Strategi auth Sprint 1** — diputuskan sementara: Laravel session auth biasa (register/login/logout/forgot-password, hand-rolled, tidak pakai Breeze/Fortify). Tidak mengunci ke SSO Kreen Connect; migrasi ke SSO nanti hanya perlu ganti layer auth, skema `users`/`organizations` tidak perlu berubah. **Belum final decision dari Ersa** — re-evaluasi kalau SSO Kreen jadi prioritas sebelum Sprint 2+ menambah lebih banyak yang bergantung pada auth ini.

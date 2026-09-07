@@ -1,8 +1,10 @@
 # _docs — Master Index
 
-Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tunggal. Belum ada kode; dokumen ini adalah baseline sebelum baris kode fitur pertama ditulis (standar v5, Lapis 1 — 18 file).
+Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tunggal. Standar v5, Lapis 1 (18 file baseline). Sprint 1-2 backend sudah selesai & PASS-review (74 test hijau).
 
 **MVP saat ini: "Siapgrak Admin v1"** (ADR-002) — sistem internal panitia, tanpa halaman publik. Public site, self-registration, dan Kreenconnect integration sengaja DEFERRED. Lihat [decisions/adr-002-admin-first-mvp.md](decisions/adr-002-admin-first-mvp.md) dan [tasks/tasks.md](tasks/tasks.md).
+
+**Pembagian kerja (2026-09-07):** frontend/UI dan backend Sprint 3+ berjalan **paralel, terpisah** — lihat [frontend/frontend-plan.md](frontend/frontend-plan.md) (build order F0-F12, boleh mock data) dan [`BACKEND-HANDOFF.md`](../BACKEND-HANDOFF.md) (kontrak tim dev, root project).
 
 **Terakhir diupdate:** 2026-09-07
 
@@ -27,6 +29,8 @@ Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tung
 | "Diagnosis+recovery incident yang pernah terjadi?" | [operations/runbook.md](operations/runbook.md) |
 | "Checklist AI sebelum lapor selesai?" | [ai/review-checklist.md](ai/review-checklist.md) |
 | "Apa yang perlu dikerjakan, sprint mana sekarang?" | [tasks/tasks.md](tasks/tasks.md) |
+| "Rencana & build order frontend/UI?" | [frontend/frontend-plan.md](frontend/frontend-plan.md) |
+| "Kontrak kerja tim dev backend?" | [`BACKEND-HANDOFF.md`](../BACKEND-HANDOFF.md) (root project) |
 | "Detail skema ~25 tabel, kontrak API Kreenconnect lengkap, route map penuh" | [research/](research/) — rujukan teknis, bukan SoT normatif (lihat catatan di bawah) |
 
 ## Tentang Folder `research/`
@@ -73,8 +77,12 @@ _docs/
 │   └── runbook.md
 ├── ai/
 │   └── review-checklist.md
-└── tasks/
-    └── tasks.md
+├── tasks/
+│   └── tasks.md
+└── frontend/
+    └── frontend-plan.md                 (build order F0-F12, terpisah dari sprint backend)
+
+../BACKEND-HANDOFF.md                    (root project — kontrak kerja tim dev)
 ```
 
 **Belum dibuat (Lapis 2, tunda sampai dibutuhkan):** `database/erd.md` (untuk sekarang cukup rujuk `research/chatgpt-blueprint-v1.md` §"Simplified ERD"), `security/permission-matrix.md` (7 role sudah cukup terdokumentasi di BRD §User Persona + SRS §Permission, naikkan jadi file terpisah kalau role bertambah kompleks), `security/abuse-cases.md` (belum ada fitur uang/kuota native di Siapgrak — approval registration bukan target abuse tinggi; re-evaluasi begitu Phase 6 Kreenconnect integration mulai dikerjakan).
