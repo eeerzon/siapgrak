@@ -5,7 +5,47 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+/*
+ * F0 Design Foundation — Siapgrak Admin
+ * Direction: Minimalism/Swiss + Data-Dense Dashboard. Operational, not "startup SaaS" —
+ * dense-but-clean, status-forward, fast to read live at an event. See
+ * _docs/frontend/frontend-plan.md for the full rationale and page-by-page detail.
+ *
+ * Palette is Tailwind's own slate (neutral/navy) + sky (accent) + emerald/amber/red
+ * (status) scales — no invented hex values. Government/public-service-style palette:
+ * calm, high-contrast, legible, not flashy. Tokens below are semantic ALIASES onto
+ * those scales so usage stays consistent across F1-F12, not a new color system.
+ */
+
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Semantic surface/text/border tokens — use these class names via arbitrary
+       value syntax is NOT the point; these exist as a naming reference for F0
+       component docs. Components use the underlying Tailwind slate/sky/etc.
+       utilities directly (bg-slate-50, text-slate-900, border-slate-200, ...)
+       per the mapping documented in frontend-plan.md §Color Tokens. */
+}
+
+@layer base {
+    :root {
+        color-scheme: light;
+    }
+
+    body {
+        @apply bg-slate-50 text-slate-900 antialiased;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
 }

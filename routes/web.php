@@ -64,4 +64,13 @@ Route::middleware('auth')->group(function () {
                 Route::delete('{member}', [TeamMemberController::class, 'destroy'])->name('destroy');
             });
     });
+
+    // F0 Design Foundation — component gallery. Local-only (never renders in
+    // production, see _docs/frontend/frontend-plan.md) + auth-gated as a second
+    // layer of defense in case of environment misconfiguration.
+    Route::get('dev/ui', function () {
+        abort_unless(app()->environment('local'), 404);
+
+        return view('dev.ui');
+    })->name('dev.ui');
 });

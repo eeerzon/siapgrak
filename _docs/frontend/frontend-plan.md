@@ -1,6 +1,6 @@
 # Frontend Plan — Siapgrak Admin
 
-**Status:** Active. Ditulis 2026-09-07 dari diskusi dengan Ersa (via ChatGPT), setelah Sprint 1-2 backend selesai & PASS-review.
+**Status:** Active. Ditulis 2026-09-07 dari diskusi dengan Ersa (via ChatGPT), setelah Sprint 1-2 backend selesai & PASS-review. **F0 (Design Foundation) SELESAI 2026-09-09** — lihat §F0 Implementation Log di bawah. Lanjut F1 (Admin Shell).
 
 **Pembagian kerja mulai sekarang:**
 ```text
@@ -65,6 +65,37 @@ Drawer, Modal, Dropdown
 ```
 
 Sprint 1-2 sudah punya versi ad-hoc dari sebagian ini (form field pattern, flash message partial, table wrapper) — F0 merapikan jadi komponen reusable, bukan mulai dari nol.
+
+### F0 Implementation Log (2026-09-09)
+
+**Visual direction terpilih:** Minimalism/Swiss Style + Data-Dense Dashboard pattern (dipilih lewat skill `ui-ux-pro-max` — dua style ini secara eksplisit direkomendasikan untuk "enterprise apps, dashboards, admin panels" dan match dengan requirement "operational, bukan startup SaaS"). Palet warna: Government/Public Service palette — yang ternyata **persis** skala `slate` (navy/neutral) + `sky` (accent) bawaan Tailwind (`#0F172A` = `slate-900`, `#0369A1` = `sky-700`, dst) — jadi tidak ada hex baru yang diciptakan, cukup dipakai konsisten sebagai token semantik. Font: **Inter** tunggal (dipilih dari pairing "Minimal Swiss" — satu family dengan variasi weight, direkomendasikan untuk "dashboards, admin panels, enterprise apps", dan punya coverage glyph Bahasa Indonesia yang baik).
+
+**File yang dibuat:**
+```text
+resources/css/app.css                          — font Inter, prefers-reduced-motion, x-cloak rule
+resources/views/partials/head-fonts.blade.php   — Google Fonts <link>, di-include kedua layout
+resources/js/app.js                             — Alpine.js init (BARU DIPASANG, belum ada dari scaffold)
+
+resources/views/components/ui/
+├── button.blade.php        (variant: primary/secondary/danger/ghost, size: sm/md, href-as-link)
+├── badge.blade.php         (variant: neutral/info/success/warning/danger — status visibility)
+├── card.blade.php
+├── input.blade.php         (label+error+old() built-in)
+├── select.blade.php
+├── textarea.blade.php
+├── table.blade.php + table-th.blade.php + table-td.blade.php
+├── empty-state.blade.php
+├── error-state.blade.php
+├── skeleton.blade.php
+├── modal.blade.php         (Alpine, shares `open` dari x-data ancestor)
+└── drawer.blade.php        (Alpine, slide-over kanan, pola sama modal)
+
+resources/views/dev/ui.blade.php  — component gallery, route /dev/ui (auth + local-env gated)
+```
+
+**Bug ditemukan+fix selama build:** teks deskripsi di gallery yang menyebut `@error()` (sebagai CONTOH, bukan kode sungguhan) ditafsirkan Blade sebagai directive nyata → parse error "unexpected end of file, expecting elseif/else/endif" di seluruh halaman. Fix: escape jadi `@@error()`. Pelajaran: teks apa pun di Blade view yang MENYEBUT nama directive (`@if`, `@error`, `@foreach`, dll) sebagai kata biasa harus di-escape dengan `@@`.
+
+**Verifikasi:** Pint clean, 74 test Sprint 1-2 tetap hijau (no regression dari perubahan layout/CSS/JS), gallery `/dev/ui` di-render manual di browser — semua section (typography, color tokens, buttons, badges, form controls, cards, table, empty/loading/error states) tampil benar. **Catatan terbatas:** interaksi Modal/Drawer (klik tombol → Alpine toggle `open`) tidak bisa diverifikasi visual end-to-end di sesi ini karena Browser pane sempat backgrounded (`document.hidden: true`) — Chrome men-throttle CSS transition di tab tersembunyi, membuat animasi macet di state "belum keluar dari display:none" walau Alpine state (`open: true`) sudah benar. Root cause dikonfirmasi via `document.visibilityState`, bukan bug komponen — tapi **verifikasi visual manual dengan pane foreground disarankan sekali sebelum dipakai di F1+**.
 
 ## 5. Page Inventory & Build Order
 
