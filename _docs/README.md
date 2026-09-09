@@ -29,6 +29,7 @@ Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tung
 | "Diagnosis+recovery incident yang pernah terjadi?" | [operations/runbook.md](operations/runbook.md) |
 | "Checklist AI sebelum lapor selesai?" | [ai/review-checklist.md](ai/review-checklist.md) |
 | "Apa yang perlu dikerjakan, sprint mana sekarang?" | [tasks/tasks.md](tasks/tasks.md) |
+| "Progress sesi terakhir, blocker, next steps?" | [status/log.md](status/log.md) |
 | "Rencana & build order frontend/UI?" | [frontend/frontend-plan.md](frontend/frontend-plan.md) |
 | "Kontrak kerja tim dev backend?" | [`BACKEND-HANDOFF.md`](../BACKEND-HANDOFF.md) (root project) |
 | "Detail skema ~25 tabel, kontrak API Kreenconnect lengkap, route map penuh" | [research/](research/) — rujukan teknis, bukan SoT normatif (lihat catatan di bawah) |
@@ -79,6 +80,8 @@ _docs/
 │   └── review-checklist.md
 ├── tasks/
 │   └── tasks.md
+├── status/
+│   └── log.md                           (progress per sesi, WAJIB diupdate — lihat CLAUDE.md §"Status Update")
 └── frontend/
     └── frontend-plan.md                 (build order F0-F12, terpisah dari sprint backend)
 

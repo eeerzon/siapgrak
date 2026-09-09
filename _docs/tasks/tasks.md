@@ -8,6 +8,8 @@ Intake SEMUA request (bug, fitur, apapun). Diedit manual oleh Ersa saat brief ba
 
 **🔴 Pembagian kerja tim (2026-09-07):** roadmap sprint di bawah ini sekarang murni **track backend**, dikerjakan tim dev — lihat `BACKEND-HANDOFF.md` (root project) untuk kontrak lengkap. **Track frontend/UI berjalan paralel, terpisah dari nomor sprint di bawah** — lihat `_docs/frontend/frontend-plan.md` (build order sendiri F0-F12, boleh pakai mock data, tidak menunggu sprint backend selesai). Dua track ini disatukan lewat "Backend Data Contract" di frontend-plan.md — begitu backend Sprint-N live, frontend tinggal ganti sumber data tanpa re-desain.
 
+**Progress track frontend (2026-09-09):** F0 (Design Foundation) + F1 (Admin Shell) selesai — 2/13 step. Urutan lanjutan direvisi Ersa: F3 Teams polish → F4 Event List/Create → F5 Event Workspace → F2 Dashboard → F6-F12. Detail per-step ada di `_docs/frontend/frontend-plan.md` §F0/§F1 Implementation Log dan `_docs/status/log.md`.
+
 ## Blocking Dependency
 
 - [x] **Strategi auth Sprint 1** — diputuskan sementara: Laravel session auth biasa (register/login/logout/forgot-password, hand-rolled, tidak pakai Breeze/Fortify). Tidak mengunci ke SSO Kreen Connect; migrasi ke SSO nanti hanya perlu ganti layer auth, skema `users`/`organizations` tidak perlu berubah. **Belum final decision dari Ersa** — re-evaluasi kalau SSO Kreen jadi prioritas sebelum Sprint 2+ menambah lebih banyak yang bergantung pada auth ini.

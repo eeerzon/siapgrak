@@ -6,7 +6,7 @@ Platform operasional untuk Paskibra/LKBB (Lomba Ketangkasan Baris Berbaris) — 
 
 **MVP saat ini: "Siapgrak Admin v1"** (ADR-002, 2026-09-07) — sistem internal panitia dari setup event sampai hasil akhir, **tanpa satu pun halaman publik**. Public site, participant self-registration, dan integrasi Kreenconnect (ticketing/voting) sengaja DEFERRED — tetap ada di desain (`_docs/research/`), tidak dikerjakan sekarang.
 
-**Status saat ini (2026-09-07):** Sprint 1-2 backend selesai & PASS-review (74 test hijau). **Pembagian kerja mulai sekarang: frontend/UI dikerjakan terpisah (lihat `_docs/frontend/frontend-plan.md`), tim dev fokus penuh ke backend Sprint 3-13 (lihat `BACKEND-HANDOFF.md`).** Kalau sesi ini diminta kerja frontend, itu domainnya F0-F12 di `frontend-plan.md` — bukan backend Sprint 3+. Kalau diminta lanjut backend Sprint 3+, itu domain tim dev di `BACKEND-HANDOFF.md` — pastikan konteksnya jelas sebelum mulai, dua pekerjaan ini sengaja dipisah supaya tidak saling tunggu.
+**Status saat ini (2026-09-09):** Sprint 1-2 backend selesai & PASS-review (74 test hijau). **Pembagian kerja: frontend/UI dikerjakan terpisah (lihat `_docs/frontend/frontend-plan.md`), tim dev fokus penuh ke backend Sprint 3-13 (lihat `BACKEND-HANDOFF.md`).** Kalau sesi ini diminta kerja frontend, itu domainnya F0-F12 di `frontend-plan.md` — bukan backend Sprint 3+. Kalau diminta lanjut backend Sprint 3+, itu domain tim dev di `BACKEND-HANDOFF.md` — pastikan konteksnya jelas sebelum mulai, dua pekerjaan ini sengaja dipisah supaya tidak saling tunggu. Frontend: F0+F1 selesai (2/13 step), lanjut F3 Teams polish — lihat `_docs/status/log.md` untuk progress terbaru per sesi.
 
 ---
 
@@ -27,6 +27,7 @@ Cara release/rollback       → _docs/quality/release-checklist.md + _docs/opera
 Aturan keamanan             → _docs/security/security-baseline.md
 Checklist sebelum lapor     → _docs/ai/review-checklist.md
 Pekerjaan aktif              → _docs/tasks/tasks.md
+Progress per sesi (handoff)  → _docs/status/log.md
 Rencana & build order frontend → _docs/frontend/frontend-plan.md
 Kontrak kerja tim dev (backend) → BACKEND-HANDOFF.md
 ```
