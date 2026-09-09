@@ -3,10 +3,14 @@
 @section('title', 'Buat Team')
 
 @section('content')
-    <div class="mx-auto max-w-xl">
-        <h2 class="mb-1 text-lg font-semibold text-slate-800">Buat Team</h2>
-        <p class="mb-6 text-sm text-slate-500">Team adalah identitas kompetisi (mis. "Paskibra Utama"), reusable untuk event berikutnya.</p>
+    <x-layout.breadcrumb :items="[
+        ['label' => 'Teams', 'href' => route('dashboard.teams.index')],
+        ['label' => 'Buat Team'],
+    ]" />
 
+    <x-layout.page-header title="Buat Team" description='Team adalah identitas kompetisi (mis. "Paskibra Utama"), reusable untuk event berikutnya.' />
+
+    <div class="mx-auto max-w-xl">
         @if ($organizations->isEmpty())
             <div class="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
                 Anda belum tergabung di organisasi manapun. <a href="{{ route('dashboard.organizations.create') }}" class="font-medium underline">Buat organisasi dulu</a> sebelum membuat team.

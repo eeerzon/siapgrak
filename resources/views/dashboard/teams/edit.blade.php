@@ -3,10 +3,15 @@
 @section('title', 'Edit ' . $team->name)
 
 @section('content')
-    <div class="mx-auto max-w-xl">
-        <h2 class="mb-1 text-lg font-semibold text-slate-800">Edit Team</h2>
-        <p class="mb-6 text-sm text-slate-500">Organisasi pemilik: <strong>{{ $team->organization?->name ?? '—' }}</strong> (tidak bisa diubah di sini).</p>
+    <x-layout.breadcrumb :items="[
+        ['label' => 'Teams', 'href' => route('dashboard.teams.index')],
+        ['label' => $team->name, 'href' => route('dashboard.teams.show', $team)],
+        ['label' => 'Edit'],
+    ]" />
 
+    <x-layout.page-header title="Edit Team" :description="'Organisasi pemilik: '.($team->organization?->name ?? '—').' (tidak bisa diubah di sini).'" />
+
+    <div class="mx-auto max-w-xl">
         <form method="POST" action="{{ route('dashboard.teams.update', $team) }}" class="space-y-4"
               onsubmit="this.querySelector('button[type=submit]').disabled = true;">
             @csrf

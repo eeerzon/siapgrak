@@ -1,6 +1,6 @@
 # Frontend Plan — Siapgrak Admin
 
-**Status:** Active. Ditulis 2026-09-07 dari diskusi dengan Ersa (via ChatGPT), setelah Sprint 1-2 backend selesai & PASS-review. **F0 (Design Foundation) SELESAI 2026-09-09** — lihat §F0 Implementation Log di bawah. Lanjut F1 (Admin Shell).
+**Status:** Active. Ditulis 2026-09-07 dari diskusi dengan Ersa (via ChatGPT), setelah Sprint 1-2 backend selesai & PASS-review. **F0 (Design Foundation) SELESAI 2026-09-09**, **F1 (Admin Shell) SELESAI 2026-09-09** — lihat §F0/§F1 Implementation Log di bawah. Urutan lanjutan (revisi Ersa 2026-09-09): F1 → **F3 Teams polish** → F4 Event List/Create prototype → F5 Event Workspace → baru F2 Dashboard (Teams sudah punya backend nyata, jadi design system tervalidasi di data sungguhan dulu sebelum Event Workspace mengunci pola terbesar produk).
 
 **Pembagian kerja mulai sekarang:**
 ```text
@@ -96,6 +96,29 @@ resources/views/dev/ui.blade.php  — component gallery, route /dev/ui (auth + l
 **Bug ditemukan+fix selama build:** teks deskripsi di gallery yang menyebut `@error()` (sebagai CONTOH, bukan kode sungguhan) ditafsirkan Blade sebagai directive nyata → parse error "unexpected end of file, expecting elseif/else/endif" di seluruh halaman. Fix: escape jadi `@@error()`. Pelajaran: teks apa pun di Blade view yang MENYEBUT nama directive (`@if`, `@error`, `@foreach`, dll) sebagai kata biasa harus di-escape dengan `@@`.
 
 **Verifikasi:** Pint clean, 74 test Sprint 1-2 tetap hijau (no regression dari perubahan layout/CSS/JS), gallery `/dev/ui` di-render manual di browser — semua section (typography, color tokens, buttons, badges, form controls, cards, table, empty/loading/error states) tampil benar. **Catatan terbatas:** interaksi Modal/Drawer (klik tombol → Alpine toggle `open`) tidak bisa diverifikasi visual end-to-end di sesi ini karena Browser pane sempat backgrounded (`document.hidden: true`) — Chrome men-throttle CSS transition di tab tersembunyi, membuat animasi macet di state "belum keluar dari display:none" walau Alpine state (`open: true`) sudah benar. Root cause dikonfirmasi via `document.visibilityState`, bukan bug komponen — tapi **verifikasi visual manual dengan pane foreground disarankan sekali sebelum dipakai di F1+**.
+
+### F1 Implementation Log (2026-09-09)
+
+**Struktur shell diputuskan:** Sidebar (desktop, ≥md) berisi brand + org context + nav (Teams/Organizations, route-gated) + account row (bawah, dropdown Logout). Topbar (mobile, <md) hanya brand + org context — **tanpa hamburger**, karena nav mobile sepenuhnya lewat bottom nav, bukan slide-out drawer. Bottom nav (mobile) 3 tab: Teams, Organizations, Lainnya (Lainnya = account menu, sama seperti sidebar). Account menu adalah satu komponen reusable (`layout.account-menu`, slot `trigger` custom, panel sama) dipakai di kedua tempat — bukan dua implementasi dropdown terpisah.
+
+**File yang dibuat:**
+```text
+resources/views/components/layout/
+├── sidebar.blade.php       (desktop only, w-60, sticky)
+├── topbar.blade.php        (mobile only, brand+org context)
+├── mobile-nav.blade.php    (mobile only, fixed bottom, 3 tab)
+├── account-menu.blade.php  (self-contained x-data, slot trigger, dipakai sidebar+mobile-nav)
+├── page-header.blade.php   (title+description+actions slot — pattern resmi tiap halaman)
+└── breadcrumb.blade.php    (items array, dipakai di halaman ≥1 level di bawah index)
+```
+`layouts/dashboard.blade.php` ditulis ulang untuk komposisi shell di atas (query `auth()->user()->organizations()` dihitung sekali di layout, di-share ke sidebar+topbar sebagai prop supaya tidak query dobel). Semua 8 halaman Sprint 1-2 (teams/organizations index/show/create/edit + kedua halaman members/index) diupdate memakai `<x-layout.page-header>` (dan breadcrumb di halaman show/edit/members) menggantikan header ad-hoc — isi form/table di dalamnya TIDAK disentuh (itu scope F3 Teams polish).
+
+**Keputusan desain (tidak eksplisit di brief, diputuskan sendiri secara wajar):**
+- **Organization context belum jadi switcher aktif** — backend belum punya konsep "active organization" (tidak ada session/`current_organization_id`). Ditampilkan sebagai teks statis (organisasi pertama user, atau "N organisasi" kalau >1) tanpa interaktivitas. Ini SENGAJA tidak dibangun jadi stateful switcher sekarang (sesuai instruksi Ersa: "bukan dropdown switcher kompleks dulu") — switcher nyata baru relevan begitu Events butuh org-scoping.
+- **Account menu HANYA di satu tempat per breakpoint** (sidebar bawah utk desktop, tab "Lainnya" utk mobile) — topbar mobile sengaja tidak punya account trigger sendiri, supaya tidak ada dua entry point untuk hal yang sama.
+
+**Verifikasi:** Pint clean, 74 test tetap hijau, manual browser check desktop (1280px — sidebar+nav+active state+account dropdown berfungsi) dan mobile (375px — topbar+bottom nav+active state+content tidak ketutup nav, dicek via screenshot beneran) keduanya benar. `document.documentElement.scrollWidth === clientWidth` di desktop (no horizontal overflow). **Catatan sama seperti F0:** saat mencoba klik tab "Lainnya" dengan Browser pane backgrounded, panel account-menu (pakai `x-transition`) macet di `display:none` walau Alpine state `open` sudah `true` — dikonfirmasi ulang via `document.hidden`/`Alpine.$data()` bahwa ini murni environment testing (Chrome throttle transition di tab tersembunyi), BUKAN regresi baru. Tidak sempat mendapat window pane foreground di sesi ini untuk re-check visual penuh Modal/Drawer (F0) maupun account-menu (F1) — **disarankan satu kali manual click-through oleh Ersa langsung di browser** (bukan lewat tool ini) sebelum halaman-halaman berikutnya (F3 Teams polish) bergantung ke pola dropdown/modal ini untuk aksi penting.
+**Ingat rebuild asset:** perubahan Blade/CSS/JS di project ini butuh `npm run build` manual (tidak ada Vite dev server jalan) — kelupaan rebuild sempat bikin sidebar tidak muncul sama sekali saat verifikasi (class baru belum ke-compile ke `public/build`).
 
 ## 5. Page Inventory & Build Order
 

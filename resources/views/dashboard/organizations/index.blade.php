@@ -3,13 +3,11 @@
 @section('title', 'Organizations')
 
 @section('content')
-    <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-slate-800">Organisasi Anda</h2>
-        <a href="{{ route('dashboard.organizations.create') }}"
-           class="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
-            + Buat Organisasi
-        </a>
-    </div>
+    <x-layout.page-header title="Organizations" description="Organisasi tempat Anda menjadi anggota.">
+        <x-slot:actions>
+            <x-ui.button href="{{ route('dashboard.organizations.create') }}">+ Buat Organisasi</x-ui.button>
+        </x-slot:actions>
+    </x-layout.page-header>
 
     @if ($organizations->isEmpty())
         <div class="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">

@@ -3,10 +3,13 @@
 @section('title', 'Roster — ' . $team->name)
 
 @section('content')
-    <div class="mb-6">
-        <h2 class="text-lg font-semibold text-slate-800">Roster {{ $team->name }}</h2>
-        <a href="{{ route('dashboard.teams.show', $team) }}" class="text-sm text-slate-500 hover:underline">&larr; Kembali ke team</a>
-    </div>
+    <x-layout.breadcrumb :items="[
+        ['label' => 'Teams', 'href' => route('dashboard.teams.index')],
+        ['label' => $team->name, 'href' => route('dashboard.teams.show', $team)],
+        ['label' => 'Roster'],
+    ]" />
+
+    <x-layout.page-header title="Roster {{ $team->name }}" />
 
     @can('manageMembers', $team)
         <div class="mb-6 rounded-lg border border-slate-200 bg-white p-4">

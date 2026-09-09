@@ -3,12 +3,13 @@
 @section('title', 'Anggota — ' . $organization->name)
 
 @section('content')
-    <div class="mb-6 flex items-center justify-between">
-        <div>
-            <h2 class="text-lg font-semibold text-slate-800">Anggota {{ $organization->name }}</h2>
-            <a href="{{ route('dashboard.organizations.show', $organization) }}" class="text-sm text-slate-500 hover:underline">&larr; Kembali ke organisasi</a>
-        </div>
-    </div>
+    <x-layout.breadcrumb :items="[
+        ['label' => 'Organizations', 'href' => route('dashboard.organizations.index')],
+        ['label' => $organization->name, 'href' => route('dashboard.organizations.show', $organization)],
+        ['label' => 'Anggota'],
+    ]" />
+
+    <x-layout.page-header title="Anggota {{ $organization->name }}" />
 
     <div class="mb-6 rounded-lg border border-slate-200 bg-white p-4">
         <h3 class="mb-3 text-sm font-medium text-slate-700">Tambah Anggota</h3>

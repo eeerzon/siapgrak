@@ -7,41 +7,27 @@
     @include('partials.head-fonts')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased">
-    <div class="flex min-h-screen flex-col md:flex-row">
-        <aside class="w-full shrink-0 border-b border-slate-200 bg-white md:w-56 md:border-b-0 md:border-r">
-            <div class="px-4 py-4 text-lg font-semibold text-slate-800">Siapgrak</div>
-            <nav class="space-y-1 px-2 pb-4">
-                {{-- Sidebar final CLAUDE.md: Dashboard/Events/Teams/Organization/Settings.
-                     Hanya item dengan route nyata yang dirender (lihat Sprint 1 & 2 Final
-                     Report) — Events/Settings menyusul begitu sprint-nya punya route. --}}
-                <a href="{{ route('dashboard.teams.index') }}"
-                   class="block rounded px-3 py-2 text-sm font-medium {{ request()->routeIs('dashboard.teams.*') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50' }}">
-                    Teams
-                </a>
-                <a href="{{ route('dashboard.organizations.index') }}"
-                   class="block rounded px-3 py-2 text-sm font-medium {{ request()->routeIs('dashboard.organizations.*') ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50' }}">
-                    Organizations
-                </a>
-            </nav>
-        </aside>
+<body class="overflow-x-hidden bg-slate-50 text-slate-900 antialiased">
+    @php
+        // Computed once and shared with sidebar + topbar so the org-context
+        // query doesn't run twice per request (only one of the two renders
+        // per breakpoint, but Blade compiles both branches server-side).
+        $shellOrganizations = auth()->user()->organizations()->orderBy('name')->get();
+    @endphp
 
-        <div class="flex-1">
-            <header class="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:px-6">
-                <h1 class="text-base font-semibold text-slate-800">@yield('title', 'Dashboard')</h1>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-sm text-slate-500 hover:text-slate-800">
-                        {{ auth()->user()->name }} — Logout
-                    </button>
-                </form>
-            </header>
+    <div class="flex min-h-screen">
+        <x-layout.sidebar :organizations="$shellOrganizations" />
 
-            <main class="px-4 py-6 md:px-6">
+        <div class="flex min-w-0 flex-1 flex-col">
+            <x-layout.topbar :organizations="$shellOrganizations" />
+
+            <main class="flex-1 px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">
                 @include('partials.flash-messages')
                 @yield('content')
             </main>
         </div>
     </div>
+
+    <x-layout.mobile-nav />
 </body>
 </html>

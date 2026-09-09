@@ -3,9 +3,15 @@
 @section('title', 'Edit ' . $organization->name)
 
 @section('content')
-    <div class="mx-auto max-w-xl">
-        <h2 class="mb-6 text-lg font-semibold text-slate-800">Edit Organisasi</h2>
+    <x-layout.breadcrumb :items="[
+        ['label' => 'Organizations', 'href' => route('dashboard.organizations.index')],
+        ['label' => $organization->name, 'href' => route('dashboard.organizations.show', $organization)],
+        ['label' => 'Edit'],
+    ]" />
 
+    <x-layout.page-header title="Edit Organisasi" />
+
+    <div class="mx-auto max-w-xl">
         <form method="POST" action="{{ route('dashboard.organizations.update', $organization) }}" class="space-y-4"
               onsubmit="this.querySelector('button[type=submit]').disabled = true;">
             @csrf

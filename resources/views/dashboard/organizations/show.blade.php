@@ -3,26 +3,21 @@
 @section('title', $organization->name)
 
 @section('content')
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-            <h2 class="text-lg font-semibold text-slate-800">{{ $organization->name }}</h2>
-            <p class="text-sm text-slate-500">{{ ucfirst($organization->type->value) }} · Status: {{ $organization->status->value }}</p>
-        </div>
-        <div class="flex gap-2">
+    <x-layout.breadcrumb :items="[
+        ['label' => 'Organizations', 'href' => route('dashboard.organizations.index')],
+        ['label' => $organization->name],
+    ]" />
+
+    <x-layout.page-header :title="$organization->name" :description="ucfirst($organization->type->value).' · Status: '.$organization->status->value">
+        <x-slot:actions>
             @can('update', $organization)
-                <a href="{{ route('dashboard.organizations.edit', $organization) }}"
-                   class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                    Edit Settings
-                </a>
+                <x-ui.button variant="secondary" href="{{ route('dashboard.organizations.edit', $organization) }}">Edit Settings</x-ui.button>
             @endcan
             @can('manageMembers', $organization)
-                <a href="{{ route('dashboard.organizations.members.index', $organization) }}"
-                   class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                    Kelola Anggota
-                </a>
+                <x-ui.button variant="secondary" href="{{ route('dashboard.organizations.members.index', $organization) }}">Kelola Anggota</x-ui.button>
             @endcan
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-layout.page-header>
 
     <div class="rounded-lg border border-slate-200 bg-white p-6">
         <dl class="grid gap-4 sm:grid-cols-2">

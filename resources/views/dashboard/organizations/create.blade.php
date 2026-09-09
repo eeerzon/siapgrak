@@ -3,10 +3,14 @@
 @section('title', 'Buat Organisasi')
 
 @section('content')
-    <div class="mx-auto max-w-xl">
-        <h2 class="mb-1 text-lg font-semibold text-slate-800">Buat Organisasi</h2>
-        <p class="mb-6 text-sm text-slate-500">Organisasi adalah wadah penyelenggara event LKBB/Paskibra Anda (mis. FORBASI Kota Bandung). Anda otomatis jadi owner.</p>
+    <x-layout.breadcrumb :items="[
+        ['label' => 'Organizations', 'href' => route('dashboard.organizations.index')],
+        ['label' => 'Buat Organisasi'],
+    ]" />
 
+    <x-layout.page-header title="Buat Organisasi" description="Organisasi adalah wadah penyelenggara event LKBB/Paskibra Anda (mis. FORBASI Kota Bandung). Anda otomatis jadi owner." />
+
+    <div class="mx-auto max-w-xl">
         <form method="POST" action="{{ route('dashboard.organizations.store') }}" class="space-y-4"
               onsubmit="this.querySelector('button[type=submit]').disabled = true;">
             @csrf
