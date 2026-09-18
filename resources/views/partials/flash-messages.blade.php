@@ -10,6 +10,18 @@
     </div>
 @endif
 
+@if (session('info'))
+    <div class="mb-4 rounded-md bg-sky-50 px-4 py-3 text-sm text-sky-800" role="status">
+        {{ session('info') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        {{ session('error') }}
+    </div>
+@endif
+
 @if ($errors->any())
     <div class="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
         <ul class="list-inside list-disc space-y-1">
