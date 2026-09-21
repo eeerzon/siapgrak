@@ -109,7 +109,7 @@
                                                                         <input type="hidden" name="_result_id" value="{{ $result->id }}">
                                                                         <input type="hidden" name="_tab" value="results">
                                                                         <input type="number" name="penalty" step="0.001" min="0" value="{{ $result->penalty_score }}"
-                                                                               class="w-20 rounded-md border text-right text-sm shadow-sm focus:ring-slate-500 {{ $isFailedPenaltyRow ? 'border-red-400 focus:border-red-500' : 'border-slate-300 focus:border-slate-500' }}">
+                                                                               class="w-20 rounded-md border px-2 py-1.5 text-right text-sm shadow-sm focus:ring-slate-500 {{ $isFailedPenaltyRow ? 'border-red-400 focus:border-red-500' : 'border-slate-300 focus:border-slate-500' }}">
                                                                         <button type="submit" class="cursor-pointer text-xs font-medium text-sky-700 hover:underline">Set</button>
                                                                     </form>
                                                                     @if ($isFailedPenaltyRow)

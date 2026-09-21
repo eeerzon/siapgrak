@@ -20,17 +20,17 @@
                             <div>
                                 <label class="block text-xs text-slate-500">Prefix</label>
                                 <input name="prefix" placeholder="A" maxlength="10"
-                                       class="mt-0.5 w-16 rounded-md border border-slate-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                                       class="mt-0.5 w-16 rounded-md border border-slate-300 px-2 py-1.5 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-500">Mulai</label>
                                 <input name="start" type="number" min="1" value="1" required
-                                       class="mt-0.5 w-16 rounded-md border border-slate-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                                       class="mt-0.5 w-16 rounded-md border border-slate-300 px-2 py-1.5 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-500">Digit</label>
                                 <input name="digits" type="number" min="1" max="6" value="2" required
-                                       class="mt-0.5 w-16 rounded-md border border-slate-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                                       class="mt-0.5 w-16 rounded-md border border-slate-300 px-2 py-1.5 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
                             </div>
                             <x-ui.button type="submit" size="sm" variant="secondary">Generate Nomor</x-ui.button>
                         </form>
@@ -64,13 +64,13 @@
                                                 @csrf @method('PATCH')
                                                 <input type="hidden" name="_tab" value="competition">
                                                 <input name="competition_number" value="{{ $entry->competition_number }}" placeholder="Nomor" maxlength="50"
-                                                       class="w-20 rounded-md border border-slate-300 text-xs shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                                                       class="w-20 rounded-md border border-slate-300 px-2 py-1.5 text-xs shadow-sm focus:border-slate-500 focus:ring-slate-500">
                                                 <button type="submit" class="cursor-pointer text-xs font-medium text-sky-700 hover:underline">Simpan</button>
                                             </form>
                                             <form method="POST" action="{{ route('dashboard.competition-entries.status', $entry) }}" class="flex items-center gap-1">
                                                 @csrf @method('PATCH')
                                                 <input type="hidden" name="_tab" value="competition">
-                                                <select name="status" class="rounded-md border border-slate-300 text-xs shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                                                <select name="status" class="rounded-md border border-slate-300 px-2 py-1.5 text-xs shadow-sm focus:border-slate-500 focus:ring-slate-500">
                                                     @foreach (\App\Enums\CompetitionEntryStatus::cases() as $case)
                                                         <option value="{{ $case->value }}" @selected($case === $entry->status)>{{ \Illuminate\Support\Str::headline($case->value) }}</option>
                                                     @endforeach

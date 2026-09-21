@@ -37,7 +37,7 @@
                         @csrf
                         @method('PATCH')
                         <select name="status" required
-                                class="rounded-md border border-slate-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                                class="rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
                             @foreach ($allowedTransitions as $target)
                                 <option value="{{ $target->value }}">{{ \Illuminate\Support\Str::headline($target->value) }}</option>
                             @endforeach
