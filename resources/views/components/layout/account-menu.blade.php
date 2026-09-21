@@ -1,9 +1,11 @@
 {{--
     Self-contained account dropdown (own x-data, unlike ui.modal/ui.drawer which
     share state with an ancestor). Pass the visible trigger via <x-slot:trigger>;
-    the panel (name/email + Logout) is identical everywhere it's used — sidebar
-    (desktop) and mobile-nav's "Lainnya" tab. Settings/Account links go in the
-    panel once those routes exist (F-later) — do not add them speculatively now.
+    the panel (name/email + Organizations + Logout) is identical everywhere it's
+    used — sidebar (desktop) and mobile-nav's "Lainnya" tab. Organizations moved
+    in here with F2 (demoted from a primary nav slot, same as Dashboard/Events/
+    Teams). Settings link goes in once that route exists (F-later) — do not add
+    it speculatively now.
 --}}
 @props(['align' => 'start'])
 
@@ -28,6 +30,15 @@
             <p class="truncate text-sm font-medium text-slate-800">{{ auth()->user()->name }}</p>
             <p class="truncate text-xs text-slate-500">{{ auth()->user()->email }}</p>
         </div>
+
+        <div class="my-1 border-t border-slate-100"></div>
+
+        <a href="{{ route('dashboard.organizations.index') }}" class="flex items-center gap-2 rounded px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+            </svg>
+            Organizations
+        </a>
 
         <div class="my-1 border-t border-slate-100"></div>
 

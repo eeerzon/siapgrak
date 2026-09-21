@@ -22,7 +22,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard.organizations.index'));
+        return redirect()->intended(route('dashboard.index'));
     }
 
     public function destroy(Request $request): RedirectResponse

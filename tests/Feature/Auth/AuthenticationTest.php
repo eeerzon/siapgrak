@@ -20,6 +20,9 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
+        // A brand-new user has zero organizations yet — sent to the
+        // Organizations index (not the Dashboard) so the empty state can
+        // prompt "create your first organization".
         $response->assertRedirect(route('dashboard.organizations.index'));
         $this->assertDatabaseHas('users', ['email' => 'ersa@example.com']);
     }
@@ -34,7 +37,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('dashboard.organizations.index'));
+        $response->assertRedirect(route('dashboard.index'));
     }
 
     public function test_user_cannot_login_with_wrong_password(): void
@@ -62,7 +65,7 @@ class AuthenticationTest extends TestCase
 
     public function test_guest_cannot_access_dashboard(): void
     {
-        $response = $this->get(route('dashboard.organizations.index'));
+        $response = $this->get(route('dashboard.index'));
 
         $response->assertRedirect(route('login'));
     }
@@ -80,7 +83,7 @@ class AuthenticationTest extends TestCase
 
         $response = $this->actingAs($user)->get('/');
 
-        $response->assertRedirect(route('dashboard.organizations.index'));
+        $response->assertRedirect(route('dashboard.index'));
     }
 
     public function test_authenticated_user_visiting_login_is_not_caught_in_a_redirect_loop(): void
@@ -95,7 +98,7 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('home'));
 
         $response = $this->actingAs($user)->get(route('home'));
-        $response->assertRedirect(route('dashboard.organizations.index'));
+        $response->assertRedirect(route('dashboard.index'));
     }
 
     public function test_guest_visiting_home_is_redirected_to_login(): void
