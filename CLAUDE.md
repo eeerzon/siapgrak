@@ -6,7 +6,7 @@ Platform operasional untuk Paskibra/LKBB (Lomba Ketangkasan Baris Berbaris) — 
 
 **MVP saat ini: "Siapgrak Admin v1"** (ADR-002, 2026-09-07) — sistem internal panitia dari setup event sampai hasil akhir, **tanpa satu pun halaman publik**. Public site, participant self-registration, dan integrasi Kreenconnect (ticketing/voting) sengaja DEFERRED — tetap ada di desain (`_docs/research/`), tidak dikerjakan sekarang.
 
-**Status saat ini (2026-09-09):** Sprint 1-2 backend selesai & PASS-review (74 test hijau). **Pembagian kerja: frontend/UI dikerjakan terpisah (lihat `_docs/frontend/frontend-plan.md`), tim dev fokus penuh ke backend Sprint 3-13 (lihat `BACKEND-HANDOFF.md`).** Kalau sesi ini diminta kerja frontend, itu domainnya F0-F12 di `frontend-plan.md` — bukan backend Sprint 3+. Kalau diminta lanjut backend Sprint 3+, itu domain tim dev di `BACKEND-HANDOFF.md` — pastikan konteksnya jelas sebelum mulai, dua pekerjaan ini sengaja dipisah supaya tidak saling tunggu. Frontend: F0+F1 selesai (2/13 step), lanjut F3 Teams polish — lihat `_docs/status/log.md` untuk progress terbaru per sesi.
+**Status saat ini (2026-09-16):** Backend Sprint 1-13 + 4b TUNTAS (415 test hijau) dan Frontend F0-F12 TUNTAS (13/13 step) — kedua track sama-sama selesai per rencana masing-masing. **Pembagian kerja backend/frontend** (lihat `_docs/frontend/frontend-plan.md` dan `BACKEND-HANDOFF.md`) tetap jadi rujukan kalau ada pekerjaan LANJUTAN baru dibuka di salah satu track, tapi tidak ada lagi sprint/step yang terbuka di kontrak awal manapun. Lihat `_docs/status/log.md` untuk detail per sesi dan kerja lanjutan opsional yang masih terbuka (verifikasi visual manual, backup-restore.md, keputusan hosting, dst).
 
 ---
 

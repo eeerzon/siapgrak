@@ -1,6 +1,6 @@
 # _docs — Master Index
 
-Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tunggal. Standar v5, Lapis 1 (18 file baseline). Sprint 1-2 backend sudah selesai & PASS-review (74 test hijau).
+Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tunggal. Standar v5, Lapis 1 baseline. **Sprint 1-13 + 4b backend SELESAI — MVP "Siapgrak Admin v1" tuntas** — **369 test hijau di MariaDB (XAMPP)** (Phase A-E semua tuntas, termasuk CSV import). Dev lokal: `operations/deployment.md` §Local Development.
 
 **MVP saat ini: "Siapgrak Admin v1"** (ADR-002) — sistem internal panitia, tanpa halaman publik. Public site, self-registration, dan Kreenconnect integration sengaja DEFERRED. Lihat [decisions/adr-002-admin-first-mvp.md](decisions/adr-002-admin-first-mvp.md) dan [tasks/tasks.md](tasks/tasks.md).
 
@@ -14,6 +14,7 @@ Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tung
 |---|---|
 | "Kenapa Siapgrak dibangun, siapa penggunanya?" | [brd/brd-core.md](brd/brd-core.md) |
 | "Bagaimana fitur pertama (Organization/Tenancy) harus bekerja?" | [srs/fr-organization-tenancy.md](srs/fr-organization-tenancy.md) |
+| "SRS Team / Event+Category / Registration / Import CSV / Competition Entry / Schedule / Judging Setup / Judge Assignment / Scoring / Score Sheet Lifecycle / Result Calculator / Awards+Finalization / Operational Polish?" | [srs/fr-team-directory.md](srs/fr-team-directory.md) · [srs/fr-event-category.md](srs/fr-event-category.md) · [srs/fr-registration.md](srs/fr-registration.md) · [srs/fr-registration-import.md](srs/fr-registration-import.md) · [srs/fr-competition-entry.md](srs/fr-competition-entry.md) · [srs/fr-schedule.md](srs/fr-schedule.md) · [srs/fr-judging-setup.md](srs/fr-judging-setup.md) · [srs/fr-judge-assignment.md](srs/fr-judge-assignment.md) · [srs/fr-scoring.md](srs/fr-scoring.md) · [srs/fr-score-sheet-lifecycle.md](srs/fr-score-sheet-lifecycle.md) · [srs/fr-result-calculator.md](srs/fr-result-calculator.md) · [srs/fr-awards-finalization.md](srs/fr-awards-finalization.md) · [srs/fr-operational-polish.md](srs/fr-operational-polish.md) |
 | "NFR yang berlaku global?" | [srs/nfr.md](srs/nfr.md) |
 | "Kenapa keputusan arsitektur ini diambil?" | [decisions/README.md](decisions/) |
 | "Arsitektur sistem tingkat tinggi?" | [architecture/system-overview.md](architecture/system-overview.md) |
@@ -29,6 +30,7 @@ Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tung
 | "Diagnosis+recovery incident yang pernah terjadi?" | [operations/runbook.md](operations/runbook.md) |
 | "Checklist AI sebelum lapor selesai?" | [ai/review-checklist.md](ai/review-checklist.md) |
 | "Apa yang perlu dikerjakan, sprint mana sekarang?" | [tasks/tasks.md](tasks/tasks.md) |
+| "Jalur lengkap dari sekarang sampai MVP selesai (milestone M0-M7)?" | [status/roadmap-to-mvp.md](status/roadmap-to-mvp.md) |
 | "Progress sesi terakhir, blocker, next steps?" | [status/log.md](status/log.md) |
 | "Rencana & build order frontend/UI?" | [frontend/frontend-plan.md](frontend/frontend-plan.md) |
 | "Kontrak kerja tim dev backend?" | [`BACKEND-HANDOFF.md`](../BACKEND-HANDOFF.md) (root project) |
@@ -54,7 +56,20 @@ _docs/
 ├── brd/
 │   └── brd-core.md
 ├── srs/
-│   ├── fr-organization-tenancy.md      (fitur pertama — Phase A Sprint 1)
+│   ├── fr-organization-tenancy.md      (Phase A Sprint 1)
+│   ├── fr-team-directory.md            (Phase A Sprint 2)
+│   ├── fr-event-category.md            (Phase A Sprint 3)
+│   ├── fr-registration.md             (Phase B Sprint 4 — admin-entry)
+│   ├── fr-registration-import.md      (Phase B Sprint 4b — import CSV)
+│   ├── fr-competition-entry.md        (Phase C Sprint 5 — entry + nomor)
+│   ├── fr-schedule.md                 (Phase C Sprint 6 — jadwal)
+│   ├── fr-judging-setup.md            (Phase D Sprint 7 — judges + rounds + criteria)
+│   ├── fr-judge-assignment.md          (Phase D Sprint 8 — judge assignment)
+│   ├── fr-scoring.md                   (Phase D Sprint 9 — score sheet, save draft)
+│   ├── fr-score-sheet-lifecycle.md     (Phase D Sprint 10 — submit/lock/reopen + audit trail)
+│   ├── fr-result-calculator.md         (Phase E Sprint 11 — result calculator + ranking)
+│   ├── fr-awards-finalization.md       (Phase E Sprint 12 — awards + finalize/publish/reopen)
+│   ├── fr-operational-polish.md        (Sprint 13 — audit permission/pagination/N+1 + activity log retrofit)
 │   └── nfr.md
 ├── decisions/
 │   ├── README.md
@@ -81,7 +96,8 @@ _docs/
 ├── tasks/
 │   └── tasks.md
 ├── status/
-│   └── log.md                           (progress per sesi, WAJIB diupdate — lihat CLAUDE.md §"Status Update")
+│   ├── log.md                           (progress per sesi, WAJIB diupdate — lihat CLAUDE.md §"Status Update")
+│   └── roadmap-to-mvp.md                (sintesis: milestone M0-M7 dari kondisi sekarang sampai MVP selesai)
 └── frontend/
     └── frontend-plan.md                 (build order F0-F12, terpisah dari sprint backend)
 
