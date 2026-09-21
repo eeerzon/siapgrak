@@ -4,11 +4,17 @@
     'type' => 'text',
     'value' => null,
     'hint' => null,
+    // For array-style names (e.g. "scores[5][score]") the HTML name attribute
+    // must stay bracket notation so PHP parses it into a nested array, but
+    // old()/error lookups need dot notation ("scores.5.score") — pass the
+    // dotted form here when name isn't a plain field (judge/entries/show.blade.php).
+    'errorKey' => null,
 ])
 
 @php
     $inputId = $attributes->get('id', $name);
-    $errorMessage = $errors->first($name);
+    $lookupKey = $errorKey ?? $name;
+    $errorMessage = $errors->first($lookupKey);
 @endphp
 
 <div>
@@ -25,7 +31,7 @@
         id="{{ $inputId }}"
         name="{{ $name }}"
         type="{{ $type }}"
-        value="{{ old($name, $value) }}"
+        value="{{ old($lookupKey, $value) }}"
         {{ $attributes->except(['id'])->merge([
             'class' => 'block w-full rounded-md border shadow-sm text-sm focus:ring-slate-500 '
                 .($errorMessage ? 'border-red-400 focus:border-red-500' : 'border-slate-300 focus:border-slate-500')

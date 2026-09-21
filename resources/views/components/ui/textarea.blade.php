@@ -3,11 +3,15 @@
     'label' => null,
     'value' => null,
     'rows' => 3,
+    // See x-ui.input for why this exists — array-style names need a
+    // separate dot-notation key for old()/error lookups.
+    'errorKey' => null,
 ])
 
 @php
     $inputId = $attributes->get('id', $name);
-    $errorMessage = $errors->first($name);
+    $lookupKey = $errorKey ?? $name;
+    $errorMessage = $errors->first($lookupKey);
 @endphp
 
 <div>
@@ -24,7 +28,7 @@
                 .($errorMessage ? 'border-red-400 focus:border-red-500' : 'border-slate-300 focus:border-slate-500')
                 .($label ? ' mt-1' : ''),
         ]) }}
-    >{{ old($name, $value) }}</textarea>
+    >{{ old($lookupKey, $value) }}</textarea>
 
     @if ($errorMessage)
         <p class="mt-1 text-sm text-red-600">{{ $errorMessage }}</p>
