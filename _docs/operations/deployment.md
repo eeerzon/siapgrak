@@ -2,6 +2,38 @@
 
 **Status:** belum pernah deploy. Platform hosting belum diputuskan per 2026-09-07 — dokumen ini diisi konkret begitu keputusan platform dibuat (kemungkinan mengikuti pola project Kreen lain di Hostinger, lihat `_meta/PORT-REGISTRY.md` dan memory `reference_hostinger_*` untuk pola existing, atau Vercel/lain kalau diputuskan berbeda).
 
+## Local Development (Mac — di-setup 2026-09-10, dipindah ke XAMPP 2026-09-14)
+
+```text
+PHP        8.4 (Homebrew)
+Node       26 (Homebrew) — npm run build manual, tidak ada Vite dev server
+MySQL      XAMPP MariaDB 10.4.17 di PORT 3306 (default XAMPP).
+           Start:  buka /Applications/XAMPP/manager-osx.app -> tab MySQL -> Start
+                   (atau `sudo /Applications/XAMPP/xamppfiles/xampp startmysql` di
+                   terminal langsung — Claude/AI TIDAK bisa jalanin ini sendiri,
+                   butuh password admin Mac lewat prompt interaktif)
+```
+
+**Riwayat:** 2026-09-10 sempat pakai Homebrew MySQL 26.x di port 8065 (biar coexist dengan XAMPP yang saat itu dianggap bentrok di 3306). 2026-09-14 dipindah balik ke XAMPP (port 3306) atas permintaan Ersa — lebih mudah dicek lewat phpMyAdmin bawaan XAMPP. Config Homebrew MySQL (`/opt/homebrew/etc/my.cnf`, port 8065) **masih terpasang tapi sudah tidak dipakai project ini** — service-nya (`brew services list`) boleh di-stop kalau tidak dibutuhkan project lain.
+
+**Database:** `siapgrak` (dev) + `siapgrak_testing` (phpunit) di XAMPP MariaDB — `root`, tanpa password (default XAMPP, localhost-only; bukan secret — production pakai user scoped + password, lihat `security/security-baseline.md`).
+
+**`.env` lokal:**
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=siapgrak
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+**Lihat data lewat phpMyAdmin:** `http://localhost/phpmyadmin` (bawaan XAMPP, otomatis nunjuk ke MariaDB port 3306 yang sama) — tidak perlu setup tambahan begitu XAMPP MySQL jalan.
+
+**Test suite jalan di MySQL/MariaDB** (`phpunit.xml` → `DB_CONNECTION=mysql`, `DB_DATABASE=siapgrak_testing`) — paritas dengan target production, bukan sqlite lagi. Butuh database `siapgrak_testing` ada sebelum `php artisan test`. Kalau perlu sqlite cepat sesekali: `DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test`.
+
+**Catatan:** `.env.example` masih ship `DB_CONNECTION=sqlite` sebagai fallback zero-setup (fresh clone tanpa MySQL tetap bisa `migrate`). Dev yang ikut paritas MySQL/XAMPP set `.env` manual sesuai di atas.
+
 ## Environment
 
 ```text
