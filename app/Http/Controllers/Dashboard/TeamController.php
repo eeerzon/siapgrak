@@ -25,6 +25,7 @@ class TeamController extends Controller
         $teams = Team::query()
             ->whereIn('organization_id', $organizationIds)
             ->with('organization')
+            ->withCount('members')
             ->when($request->filled('search'), fn ($query) => $query->where('name', 'like', '%'.$request->string('search').'%'))
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
             ->orderBy('name')
@@ -57,6 +58,8 @@ class TeamController extends Controller
     public function show(Team $team): View
     {
         $this->authorize('view', $team);
+
+        $team->load(['organization', 'members' => fn ($query) => $query->orderBy('name')]);
 
         return view('dashboard.teams.show', compact('team'));
     }

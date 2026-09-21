@@ -12,69 +12,39 @@
 
     <div class="mx-auto max-w-xl">
         @if ($organizations->isEmpty())
-            <div class="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                Anda belum tergabung di organisasi manapun. <a href="{{ route('dashboard.organizations.create') }}" class="font-medium underline">Buat organisasi dulu</a> sebelum membuat team.
-            </div>
+            <x-ui.card>
+                <p class="text-sm text-slate-600">
+                    Anda belum tergabung di organisasi manapun.
+                    <a href="{{ route('dashboard.organizations.create') }}" class="font-medium text-sky-700 underline">Buat organisasi dulu</a>
+                    sebelum membuat team.
+                </p>
+            </x-ui.card>
         @else
             <form method="POST" action="{{ route('dashboard.teams.store') }}" class="space-y-4"
                   onsubmit="this.querySelector('button[type=submit]').disabled = true;">
                 @csrf
 
-                <div>
-                    <label for="organization_id" class="block text-sm font-medium text-slate-700">Organisasi Pemilik</label>
-                    <select id="organization_id" name="organization_id" required
-                            class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                        <option value="">Pilih organisasi</option>
-                        @foreach ($organizations as $organization)
-                            <option value="{{ $organization->id }}" @selected((string) old('organization_id') === (string) $organization->id)>
-                                {{ $organization->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('organization_id')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                <x-ui.select name="organization_id" label="Organisasi Pemilik" required>
+                    <option value="">Pilih organisasi</option>
+                    @foreach ($organizations as $organization)
+                        <option value="{{ $organization->id }}" @selected((string) old('organization_id') === (string) $organization->id)>
+                            {{ $organization->name }}
+                        </option>
+                    @endforeach
+                </x-ui.select>
 
-                <div>
-                    <label for="name" class="block text-sm font-medium text-slate-700">Nama Team</label>
-                    <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus
-                           class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                    @error('name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="short_name" class="block text-sm font-medium text-slate-700">Nama Singkat (opsional)</label>
-                    <input id="short_name" name="short_name" type="text" value="{{ old('short_name') }}"
-                           class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                </div>
+                <x-ui.input name="name" label="Nama Team" required autofocus />
+                <x-ui.input name="short_name" label="Nama Singkat (opsional)" />
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                        <label for="province_code" class="block text-sm font-medium text-slate-700">Provinsi (opsional)</label>
-                        <input id="province_code" name="province_code" type="text" value="{{ old('province_code') }}"
-                               class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="city_code" class="block text-sm font-medium text-slate-700">Kota (opsional)</label>
-                        <input id="city_code" name="city_code" type="text" value="{{ old('city_code') }}"
-                               class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                    </div>
+                    <x-ui.input name="province_code" label="Provinsi (opsional)" />
+                    <x-ui.input name="city_code" label="Kota (opsional)" />
                 </div>
 
-                <div>
-                    <label for="description" class="block text-sm font-medium text-slate-700">Deskripsi (opsional)</label>
-                    <textarea id="description" name="description" rows="3"
-                              class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">{{ old('description') }}</textarea>
-                </div>
+                <x-ui.textarea name="description" label="Deskripsi (opsional)" />
 
                 <div class="flex items-center gap-3">
-                    <button type="submit"
-                            class="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50">
-                        Buat Team
-                    </button>
+                    <x-ui.button type="submit">Buat Team</x-ui.button>
                     <a href="{{ route('dashboard.teams.index') }}" class="text-sm text-slate-500 hover:underline">Batal</a>
                 </div>
             </form>

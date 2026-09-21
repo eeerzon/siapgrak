@@ -9,7 +9,10 @@
         ['label' => 'Edit'],
     ]" />
 
-    <x-layout.page-header title="Edit Team" :description="'Organisasi pemilik: '.($team->organization?->name ?? '—').' (tidak bisa diubah di sini).'" />
+    <x-layout.page-header
+        title="Edit Team"
+        :description="'Organisasi pemilik: ' . ($team->organization?->name ?? '—') . ' — tidak bisa dipindah di sini.'"
+    />
 
     <div class="mx-auto max-w-xl">
         <form method="POST" action="{{ route('dashboard.teams.update', $team) }}" class="space-y-4"
@@ -17,54 +20,19 @@
             @csrf
             @method('PUT')
 
-            <div>
-                <label for="name" class="block text-sm font-medium text-slate-700">Nama Team</label>
-                <input id="name" name="name" type="text" value="{{ old('name', $team->name) }}" required autofocus
-                       class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                @error('name')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div>
-                <label for="slug" class="block text-sm font-medium text-slate-700">Slug</label>
-                <input id="slug" name="slug" type="text" value="{{ old('slug', $team->slug) }}" required
-                       class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                @error('slug')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div>
-                <label for="short_name" class="block text-sm font-medium text-slate-700">Nama Singkat</label>
-                <input id="short_name" name="short_name" type="text" value="{{ old('short_name', $team->short_name) }}"
-                       class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-            </div>
+            <x-ui.input name="name" label="Nama Team" :value="$team->name" required autofocus />
+            <x-ui.input name="slug" label="Slug" :value="$team->slug" required />
+            <x-ui.input name="short_name" label="Nama Singkat (opsional)" :value="$team->short_name" />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                    <label for="province_code" class="block text-sm font-medium text-slate-700">Provinsi</label>
-                    <input id="province_code" name="province_code" type="text" value="{{ old('province_code', $team->province_code) }}"
-                           class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="city_code" class="block text-sm font-medium text-slate-700">Kota</label>
-                    <input id="city_code" name="city_code" type="text" value="{{ old('city_code', $team->city_code) }}"
-                           class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">
-                </div>
+                <x-ui.input name="province_code" label="Provinsi (opsional)" :value="$team->province_code" />
+                <x-ui.input name="city_code" label="Kota (opsional)" :value="$team->city_code" />
             </div>
 
-            <div>
-                <label for="description" class="block text-sm font-medium text-slate-700">Deskripsi</label>
-                <textarea id="description" name="description" rows="3"
-                          class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm">{{ old('description', $team->description) }}</textarea>
-            </div>
+            <x-ui.textarea name="description" label="Deskripsi (opsional)" :value="$team->description" />
 
             <div class="flex items-center gap-3">
-                <button type="submit"
-                        class="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50">
-                    Simpan Perubahan
-                </button>
+                <x-ui.button type="submit">Simpan Perubahan</x-ui.button>
                 <a href="{{ route('dashboard.teams.show', $team) }}" class="text-sm text-slate-500 hover:underline">Batal</a>
             </div>
         </form>
