@@ -77,4 +77,12 @@ class Organization extends Model
     {
         return $this->hasMany(OrganizationUser::class);
     }
+
+    /**
+     * @return HasMany<Judge, $this>
+     */
+    public function judges(): HasMany
+    {
+        return $this->hasMany(Judge::class);
+    }
 }
