@@ -1,11 +1,16 @@
 @props([
     'name',
     'label' => null,
+    // See x-ui.input for why this exists — a page rendering multiple forms
+    // for the same field name (F7 Categories, F8 Schedule) needs the
+    // old()/error lookup key decoupled from the real submitted field name.
+    'errorKey' => null,
 ])
 
 @php
     $inputId = $attributes->get('id', $name);
-    $errorMessage = $errors->first($name);
+    $lookupKey = $errorKey ?? $name;
+    $errorMessage = $errors->first($lookupKey);
 @endphp
 
 <div>
