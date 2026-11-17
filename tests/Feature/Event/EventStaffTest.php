@@ -45,14 +45,14 @@ class EventStaffTest extends TestCase
 
         $this->actingAs($this->owner)
             ->post(route('dashboard.events.staff.store', $this->event), [
-                'user_id' => $staffUser->id,
+                'user_id' => $staffUser->id_user,
                 'role' => EventStaffRole::RegistrationStaff->value,
             ])
             ->assertRedirect(route('dashboard.events.show', $this->event));
 
         $this->assertDatabaseHas('event_staff', [
             'event_id' => $this->event->id,
-            'user_id' => $staffUser->id,
+            'user_id' => $staffUser->id_user,
             'role' => EventStaffRole::RegistrationStaff->value,
         ]);
     }
@@ -63,22 +63,22 @@ class EventStaffTest extends TestCase
 
         $this->actingAs($this->owner)
             ->post(route('dashboard.events.staff.store', $this->event), [
-                'user_id' => $outsider->id,
+                'user_id' => $outsider->id_user,
                 'role' => EventStaffRole::Viewer->value,
             ])
             ->assertSessionHasErrors('user_id');
 
-        $this->assertDatabaseMissing('event_staff', ['user_id' => $outsider->id]);
+        $this->assertDatabaseMissing('event_staff', ['user_id' => $outsider->id_user]);
     }
 
     public function test_same_user_cannot_be_staff_twice_on_one_event(): void
     {
         $staffUser = $this->memberOfOrg();
-        $this->event->staff()->create(['user_id' => $staffUser->id, 'role' => EventStaffRole::Viewer]);
+        $this->event->staff()->create(['user_id' => $staffUser->id_user, 'role' => EventStaffRole::Viewer]);
 
         $this->actingAs($this->owner)
             ->post(route('dashboard.events.staff.store', $this->event), [
-                'user_id' => $staffUser->id,
+                'user_id' => $staffUser->id_user,
                 'role' => EventStaffRole::EventAdmin->value,
             ])
             ->assertSessionHasErrors('user_id');
@@ -87,7 +87,7 @@ class EventStaffTest extends TestCase
     public function test_owner_can_change_role_and_remove_staff(): void
     {
         $staffUser = $this->memberOfOrg();
-        $staff = $this->event->staff()->create(['user_id' => $staffUser->id, 'role' => EventStaffRole::Viewer]);
+        $staff = $this->event->staff()->create(['user_id' => $staffUser->id_user, 'role' => EventStaffRole::Viewer]);
 
         $this->actingAs($this->owner)->patch(route('dashboard.events.staff.update', [$this->event, $staff]), [
             'role' => EventStaffRole::ScoringAdmin->value,
@@ -105,7 +105,7 @@ class EventStaffTest extends TestCase
 
         $this->actingAs($member)
             ->post(route('dashboard.events.staff.store', $this->event), [
-                'user_id' => $staffUser->id,
+                'user_id' => $staffUser->id_user,
                 'role' => EventStaffRole::Viewer->value,
             ])
             ->assertForbidden();
@@ -115,7 +115,7 @@ class EventStaffTest extends TestCase
     {
         $eventB = Event::factory()->create(['organization_id' => $this->organization->id]);
         $staffUser = $this->memberOfOrg();
-        $staffInB = $eventB->staff()->create(['user_id' => $staffUser->id, 'role' => EventStaffRole::Viewer]);
+        $staffInB = $eventB->staff()->create(['user_id' => $staffUser->id_user, 'role' => EventStaffRole::Viewer]);
 
         $this->actingAs($this->owner)
             ->delete(route('dashboard.events.staff.destroy', [$this->event, $staffInB]))

@@ -49,7 +49,7 @@ class OrganizationService
             'status' => Status::Active,
         ]);
 
-        return $organization->memberships()->where('user_id', $user->id)->firstOrFail();
+        return $organization->memberships()->where('user_id', $user->id_user)->firstOrFail();
     }
 
     public function changeRole(OrganizationUser $membership, OrganizationRole $role): OrganizationUser

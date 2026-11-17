@@ -18,7 +18,6 @@ use App\Services\EventService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class EventController extends Controller
@@ -90,18 +89,13 @@ class EventController extends Controller
             'scheduleSlots.entry.team',
         ])->loadCount('registrations');
 
-        // Active org members not already staff on this event — the "add staff"
-        // picker. Empty for users who can't manage staff anyway.
         $assignedUserIds = $event->staff->pluck('user_id');
         $eligibleStaffUsers = $event->organization->users()
             ->wherePivot('status', Status::Active)
-            ->whereNotIn('users.id', $assignedUserIds)
+            ->whereNotIn('users.id_user', $assignedUserIds)
             ->orderBy('name')
             ->get();
 
-        // Organization's judge directory — the assign-judge picker on the
-        // Penjurian tab (StoreJudgeAssignmentRequest re-validates server-side;
-        // this list isn't pre-filtered by round to keep the query simple).
         $organizationJudges = $event->organization->judges()->orderBy('name')->get();
 
         $registrationCounts = $event->registrations()
@@ -123,12 +117,6 @@ class EventController extends Controller
         ]);
     }
 
-    /**
-     * F9 per-category readiness checklist (frontend-plan.md §Judging Setup).
-     * Built from relations already eager-loaded in show() — no extra queries.
-     *
-     * @return list<array{label: string, ok: bool}>
-     */
     protected function judgingReadinessFor(EventCategory $category): array
     {
         $criteriaCount = $category->judgingRounds->flatMap(fn ($round) => $round->criteria)->count();
@@ -145,14 +133,6 @@ class EventController extends Controller
         ];
     }
 
-    /**
-     * F2/F5 Overview readiness strip (frontend-plan.md §Event Workspace).
-     * Built from relations already eager-loaded in show() — no extra
-     * per-item queries, everything here is in-memory collection math.
-     *
-     * @param  Collection<string, int>  $registrationCounts
-     * @return list<array{label: string, value: string, ok: bool}>
-     */
     protected function readiness(Event $event, $registrationCounts): array
     {
         $categoriesCount = $event->categories->count();
@@ -184,14 +164,6 @@ class EventController extends Controller
         ];
     }
 
-    /**
-     * Single highest-priority actionable item, in a fixed order — not a
-     * generic rule engine, just the most common "what's blocking this event"
-     * question in roughly the order an organizer would actually address it.
-     *
-     * @param  Collection<string, int>  $registrationCounts
-     * @return array{message: string, tab: ?string, cta: ?string}|null
-     */
     protected function nextAction(Event $event, $registrationCounts): ?array
     {
         $pending = $registrationCounts[RegistrationStatus::Submitted->value] ?? 0;
@@ -242,8 +214,6 @@ class EventController extends Controller
         try {
             $this->events->changeStatus($event, EventStatus::from($request->validated('status')));
         } catch (InvalidEventStatusTransition $e) {
-            // Surface as a form-validation error (302 back + error bag) —
-            // consistent with how every other bad form input is handled.
             throw ValidationException::withMessages(['status' => $e->getMessage()]);
         }
 

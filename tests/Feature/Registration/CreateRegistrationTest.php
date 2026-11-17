@@ -58,7 +58,7 @@ class CreateRegistrationTest extends TestCase
         $response->assertRedirect(route('dashboard.events.registrations.show', [$this->event, $registration]));
 
         $this->assertSame(RegistrationStatus::Draft, $registration->status);
-        $this->assertSame($this->user->id, $registration->submitted_by);
+        $this->assertSame($this->user->id_user, $registration->submitted_by);
         $this->assertNull($registration->submitted_at);
         $this->assertStringStartsWith('reg_', $registration->public_id);
     }

@@ -54,7 +54,7 @@ class LoggingTest extends TestCase
         ]);
 
         $log = ActivityLog::where('action', 'award_created')->firstOrFail();
-        $this->assertSame($this->owner->id, $log->user_id);
+        $this->assertSame($this->owner->id_user, $log->user_id);
         $this->assertSame($this->event->id, $log->event_id);
         $this->assertSame($this->organization->id, $log->organization_id);
         $this->assertSame('Juara 1', $log->metadata['name']);
@@ -100,7 +100,7 @@ class LoggingTest extends TestCase
         );
 
         $log = ActivityLog::where('action', 'registration_approved')->firstOrFail();
-        $this->assertSame($this->owner->id, $log->user_id);
+        $this->assertSame($this->owner->id_user, $log->user_id);
         $this->assertSame($this->event->id, $log->event_id);
         $this->assertSame(Registration::class, $log->subject_type);
         $this->assertSame($registration->id, $log->subject_id);
@@ -173,7 +173,7 @@ class LoggingTest extends TestCase
         $this->actingAs($this->owner)->post(route('dashboard.score-sheets.reopen', $sheet), ['reason' => 'Salah input']);
 
         $log = ActivityLog::where('action', 'score_sheet_reopened')->firstOrFail();
-        $this->assertSame($this->owner->id, $log->user_id);
+        $this->assertSame($this->owner->id_user, $log->user_id);
         $this->assertSame('Salah input', $log->metadata['reason']);
     }
 
@@ -184,7 +184,7 @@ class LoggingTest extends TestCase
         $this->actingAs($this->owner)->post(route('dashboard.judging-rounds.results.calculate', $round));
 
         $log = ActivityLog::where('action', 'result_recalculated')->firstOrFail();
-        $this->assertSame($this->owner->id, $log->user_id);
+        $this->assertSame($this->owner->id_user, $log->user_id);
         $this->assertSame($round->id, $log->metadata['judging_round_id']);
     }
 }

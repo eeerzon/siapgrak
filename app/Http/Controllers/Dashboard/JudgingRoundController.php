@@ -11,12 +11,6 @@ use App\Models\JudgingRound;
 use App\Services\JudgingService;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * Managed inline on the event's "Penjurian" tab (fr-judging-setup.md
- * Keputusan C) — no dedicated index view. Gated through
- * EventPolicy::manageJudging, no separate JudgingRoundPolicy (pattern
- * consistent since Sprint 3).
- */
 class JudgingRoundController extends Controller
 {
     public function __construct(protected JudgingService $judging) {}
@@ -43,9 +37,6 @@ class JudgingRoundController extends Controller
 
         $event = $round->category->event;
 
-        // Guard added Sprint 9 per fr-judging-setup.md Keputusan wajib —
-        // a round with saved scores is competition history, not disposable
-        // config (fr-scoring.md Keputusan H).
         if ($round->scoreSheets()->exists()) {
             return $this->backToEvent($event, 'Round tidak bisa dihapus karena sudah ada skor tersimpan.', 'error');
         }

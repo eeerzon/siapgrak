@@ -29,7 +29,7 @@ class OrganizationMemberTest extends TestCase
         $response->assertRedirect(route('dashboard.organizations.members.index', $organization));
         $this->assertDatabaseHas('organization_users', [
             'organization_id' => $organization->id,
-            'user_id' => $newMember->id,
+            'user_id' => $newMember->id_user,
             'role' => OrganizationRole::Member->value,
         ]);
     }
@@ -68,7 +68,7 @@ class OrganizationMemberTest extends TestCase
         $response->assertSessionHasErrors('email');
         $this->assertSame(
             1,
-            $organization->memberships()->where('user_id', $existingMember->id)->count(),
+            $organization->memberships()->where('user_id', $existingMember->id_user)->count(),
         );
     }
 
@@ -88,7 +88,7 @@ class OrganizationMemberTest extends TestCase
         $response->assertSessionHasErrors('role');
         $this->assertDatabaseMissing('organization_users', [
             'organization_id' => $organization->id,
-            'user_id' => $newMember->id,
+            'user_id' => $newMember->id_user,
         ]);
     }
 
@@ -112,7 +112,7 @@ class OrganizationMemberTest extends TestCase
         $organization = Organization::factory()->create();
         $organization->users()->attach($owner, ['role' => OrganizationRole::Owner, 'status' => Status::Active]);
 
-        $membership = $organization->memberships()->where('user_id', $owner->id)->firstOrFail();
+        $membership = $organization->memberships()->where('user_id', $owner->id_user)->firstOrFail();
 
         $response = $this->actingAs($owner)->delete(
             route('dashboard.organizations.members.destroy', [$organization, $membership]),
@@ -128,7 +128,7 @@ class OrganizationMemberTest extends TestCase
         $organization = Organization::factory()->create();
         $organization->users()->attach($owner, ['role' => OrganizationRole::Owner, 'status' => Status::Active]);
 
-        $membership = $organization->memberships()->where('user_id', $owner->id)->firstOrFail();
+        $membership = $organization->memberships()->where('user_id', $owner->id_user)->firstOrFail();
 
         $response = $this->actingAs($owner)->patch(
             route('dashboard.organizations.members.update', [$organization, $membership]),
@@ -150,7 +150,7 @@ class OrganizationMemberTest extends TestCase
         $organization->users()->attach($ownerOne, ['role' => OrganizationRole::Owner, 'status' => Status::Active]);
         $organization->users()->attach($ownerTwo, ['role' => OrganizationRole::Owner, 'status' => Status::Active]);
 
-        $membershipOne = $organization->memberships()->where('user_id', $ownerOne->id)->firstOrFail();
+        $membershipOne = $organization->memberships()->where('user_id', $ownerOne->id_user)->firstOrFail();
 
         $response = $this->actingAs($ownerTwo)->delete(
             route('dashboard.organizations.members.destroy', [$organization, $membershipOne]),

@@ -15,6 +15,7 @@ Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tung
 | "Kenapa Siapgrak dibangun, siapa penggunanya?" | [brd/brd-core.md](brd/brd-core.md) |
 | "Bagaimana fitur pertama (Organization/Tenancy) harus bekerja?" | [srs/fr-organization-tenancy.md](srs/fr-organization-tenancy.md) |
 | "SRS Team / Event+Category / Registration / Import CSV / Competition Entry / Schedule / Judging Setup / Judge Assignment / Scoring / Score Sheet Lifecycle / Result Calculator / Awards+Finalization / Operational Polish?" | [srs/fr-team-directory.md](srs/fr-team-directory.md) · [srs/fr-event-category.md](srs/fr-event-category.md) · [srs/fr-registration.md](srs/fr-registration.md) · [srs/fr-registration-import.md](srs/fr-registration-import.md) · [srs/fr-competition-entry.md](srs/fr-competition-entry.md) · [srs/fr-schedule.md](srs/fr-schedule.md) · [srs/fr-judging-setup.md](srs/fr-judging-setup.md) · [srs/fr-judge-assignment.md](srs/fr-judge-assignment.md) · [srs/fr-scoring.md](srs/fr-scoring.md) · [srs/fr-score-sheet-lifecycle.md](srs/fr-score-sheet-lifecycle.md) · [srs/fr-result-calculator.md](srs/fr-result-calculator.md) · [srs/fr-awards-finalization.md](srs/fr-awards-finalization.md) · [srs/fr-operational-polish.md](srs/fr-operational-polish.md) |
+| "Halaman utama publik & konten admin platform?" | [srs/fr-public-content.md](srs/fr-public-content.md) · [decisions/adr-003-public-homepage-platform-content.md](decisions/adr-003-public-homepage-platform-content.md) |
 | "NFR yang berlaku global?" | [srs/nfr.md](srs/nfr.md) |
 | "Kenapa keputusan arsitektur ini diambil?" | [decisions/README.md](decisions/) |
 | "Arsitektur sistem tingkat tinggi?" | [architecture/system-overview.md](architecture/system-overview.md) |
@@ -25,6 +26,7 @@ Siapgrak — platform operasional Paskibra/LKBB. Laravel 12 / PHP 8.3, repo tung
 | "Test strategy?" | [quality/test-strategy.md](quality/test-strategy.md) |
 | "Checklist sebelum/sesudah deploy?" | [quality/release-checklist.md](quality/release-checklist.md) |
 | "Aturan keamanan?" | [security/security-baseline.md](security/security-baseline.md) |
+| "Alur Info Lomba sampai hasil penjurian (panduan admin)?" | [operations/alur-info-lomba-penjurian.md](operations/alur-info-lomba-penjurian.md) |
 | "Cara deploy?" | [operations/deployment.md](operations/deployment.md) |
 | "Cara rollback kalau ada yang rusak?" | [operations/rollback.md](operations/rollback.md) |
 | "Diagnosis+recovery incident yang pernah terjadi?" | [operations/runbook.md](operations/runbook.md) |

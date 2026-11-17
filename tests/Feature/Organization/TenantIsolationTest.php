@@ -103,13 +103,13 @@ class TenantIsolationTest extends TestCase
         $response->assertForbidden();
         $this->assertDatabaseMissing('organization_users', [
             'organization_id' => $this->organizationB->id,
-            'user_id' => $intruder->id,
+            'user_id' => $intruder->id_user,
         ]);
     }
 
     public function test_user_a_cannot_remove_a_member_from_organization_b(): void
     {
-        $membership = $this->organizationB->memberships()->where('user_id', $this->userB->id)->firstOrFail();
+        $membership = $this->organizationB->memberships()->where('user_id', $this->userB->id_user)->firstOrFail();
 
         $response = $this->actingAs($this->userA)->delete(
             route('dashboard.organizations.members.destroy', [$this->organizationB, $membership]),
@@ -125,7 +125,7 @@ class TenantIsolationTest extends TestCase
         // actually belongs to Organization B by swapping the {organization} route
         // segment — route-model-binding alone would authorize this via `update` on A,
         // so the controller must independently verify the membership belongs to A.
-        $membershipInB = $this->organizationB->memberships()->where('user_id', $this->userB->id)->firstOrFail();
+        $membershipInB = $this->organizationB->memberships()->where('user_id', $this->userB->id_user)->firstOrFail();
 
         $response = $this->actingAs($this->userA)->patch(
             route('dashboard.organizations.members.update', [$this->organizationA, $membershipInB]),

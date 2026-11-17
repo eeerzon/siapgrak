@@ -41,11 +41,6 @@ class TeamMemberController extends Controller
             ->with('success', 'Anggota berhasil dihapus.');
     }
 
-    /**
-     * Defense against URL manipulation: {member} must actually belong to
-     * {team} from the route, independent of route-model-binding/policy —
-     * same pattern as OrganizationMemberController.
-     */
     protected function assertMemberBelongsToTeam(Team $team, TeamMember $member): void
     {
         abort_unless($member->team_id === $team->id, 404);

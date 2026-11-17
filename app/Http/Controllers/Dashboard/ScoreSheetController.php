@@ -11,12 +11,6 @@ use App\Services\ScoreSheetService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * Organizer-side score sheet review (fr-score-sheet-lifecycle.md). Gated
- * behind manageJudging entirely (Keputusan E) — scores are the most
- * sensitive data domain in the app, so this whole controller is off-limits
- * to plain 'member' role, unlike Round/Criteria which any member can view.
- */
 class ScoreSheetController extends Controller
 {
     public function __construct(protected ScoreSheetService $scoreSheets) {}
@@ -47,16 +41,13 @@ class ScoreSheetController extends Controller
     {
         $event = $this->eventFor($sheet);
 
-        // Reopening a LOCKED sheet needs Owner specifically (Keputusan A) —
-        // a merely-submitted sheet uses the same manageJudging gate as every
-        // other Judging action.
         if ($sheet->status === ScoreSheetStatus::Locked) {
             $this->authorize('reopenLockedScoreSheet', $event);
         } else {
             $this->authorize('manageJudging', $event);
         }
 
-        $this->scoreSheets->reopen($sheet, $request->user()->id, $request->validated('reason'));
+        $this->scoreSheets->reopen($sheet, $request->user()->id_user, $request->validated('reason'));
 
         return redirect()
             ->route('dashboard.score-sheets.show', $sheet)

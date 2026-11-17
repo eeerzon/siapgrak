@@ -203,10 +203,10 @@ class FinalizeTest extends TestCase
         $this->actingAs($this->owner)->post(route('dashboard.judging-rounds.results.finalize', $this->round));
         $this->actingAs($this->owner)->post(route('dashboard.judging-rounds.results.reopen', $this->round), ['reason' => 'Koreksi']);
 
-        $this->assertDatabaseHas('activity_logs', ['action' => 'result_finalized', 'user_id' => $this->owner->id, 'event_id' => $this->event->id]);
+        $this->assertDatabaseHas('activity_logs', ['action' => 'result_finalized', 'user_id' => $this->owner->id_user, 'event_id' => $this->event->id]);
 
         $reopenLog = ActivityLog::where('action', 'result_reopened')->firstOrFail();
-        $this->assertSame($this->owner->id, $reopenLog->user_id);
+        $this->assertSame($this->owner->id_user, $reopenLog->user_id);
         $this->assertSame('Koreksi', $reopenLog->metadata['reason']);
     }
 }

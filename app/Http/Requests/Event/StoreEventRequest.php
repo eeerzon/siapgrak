@@ -14,16 +14,11 @@ class StoreEventRequest extends FormRequest
         return $this->user()->can('create', Event::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $assignableOrganizationIds = app(EventService::class)->assignableOrganizationIds($this->user());
 
         return [
-            // Keputusan F: any active member of the org may create; the org
-            // itself must be one the user actually belongs to.
             'organization_id' => ['required', Rule::in($assignableOrganizationIds)],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'alpha_dash', Rule::unique('events', 'slug')],
@@ -40,9 +35,6 @@ class StoreEventRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

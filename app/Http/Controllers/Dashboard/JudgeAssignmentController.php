@@ -10,11 +10,6 @@ use App\Models\JudgingRound;
 use App\Services\JudgingService;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * No update endpoint (fr-judge-assignment.md Keputusan F) — change scope by
- * deleting and re-assigning. Gated through EventPolicy::manageJudging, same
- * as rounds/criteria (Keputusan G).
- */
 class JudgeAssignmentController extends Controller
 {
     public function __construct(protected JudgingService $judging) {}

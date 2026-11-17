@@ -12,15 +12,11 @@ class UpdateCompetitionNumberRequest extends FormRequest
         return $this->user()->can('manageCompetition', $this->route('entry')->event);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $entry = $this->route('entry');
 
         return [
-            // RULE-3: unique per category, not per event.
             'competition_number' => [
                 'nullable', 'string', 'max:50',
                 Rule::unique('competition_entries', 'competition_number')
@@ -31,9 +27,6 @@ class UpdateCompetitionNumberRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

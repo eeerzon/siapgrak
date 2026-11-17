@@ -12,9 +12,6 @@ class UpdateAwardRequest extends FormRequest
         return $this->user()->can('manageResults', $this->route('award')->event);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $eventId = $this->route('award')->event_id;
@@ -34,9 +31,6 @@ class UpdateAwardRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

@@ -70,7 +70,7 @@
                                             <form method="POST" action="{{ route('dashboard.competition-entries.status', $entry) }}" class="flex items-center gap-1">
                                                 @csrf @method('PATCH')
                                                 <input type="hidden" name="_tab" value="competition">
-                                                <select name="status" class="rounded-md border border-slate-300 px-2 py-1.5 text-xs shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                                                <select name="status" class="rounded-md border border-slate-300 py-1.5 pr-9 pl-2 text-xs shadow-sm focus:border-slate-500 focus:ring-slate-500">
                                                     @foreach (\App\Enums\CompetitionEntryStatus::cases() as $case)
                                                         <option value="{{ $case->value }}" @selected($case === $entry->status)>{{ \Illuminate\Support\Str::headline($case->value) }}</option>
                                                     @endforeach

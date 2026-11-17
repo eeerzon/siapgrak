@@ -11,11 +11,6 @@ use App\Services\RegistrationImportService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * 3-step wizard (fr-registration-import.md): upload -> map -> preview/commit.
- * Gated behind manageRegistrations throughout, same as the manual
- * registration entry flow it complements.
- */
 class RegistrationImportController extends Controller
 {
     public function __construct(protected RegistrationImportService $imports) {}
@@ -91,9 +86,6 @@ class RegistrationImportController extends Controller
             ->with('success', "{$result['created']} registrasi berhasil diimpor, {$result['skipped']} kelompok dilewati karena error.");
     }
 
-    /**
-     * @return array<string, string|null>
-     */
     protected function mappingFrom(ApplyImportMappingRequest $request): array
     {
         return [

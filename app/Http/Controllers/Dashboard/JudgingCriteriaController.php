@@ -35,7 +35,6 @@ class JudgingCriteriaController extends Controller
 
         $event = $criterion->round->category->event;
 
-        // Guard added Sprint 9 — see JudgingRoundController::destroy.
         if ($criterion->scores()->exists()) {
             return $this->backToEvent($event, 'Kriteria tidak bisa dihapus karena sudah ada skor tersimpan.', 'error');
         }

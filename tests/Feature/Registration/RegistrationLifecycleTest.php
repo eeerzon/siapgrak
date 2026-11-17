@@ -77,7 +77,7 @@ class RegistrationLifecycleTest extends TestCase
         $registration->refresh();
         $this->assertSame(RegistrationStatus::Approved, $registration->status);
         $this->assertNotNull($registration->reviewed_at);
-        $this->assertSame($this->owner->id, $registration->reviewed_by);
+        $this->assertSame($this->owner->id_user, $registration->reviewed_by);
     }
 
     public function test_reject_and_request_revision_require_notes(): void

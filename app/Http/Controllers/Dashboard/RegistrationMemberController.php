@@ -8,11 +8,6 @@ use App\Models\Registration;
 use App\Models\RegistrationMember;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * Roster is a SNAPSHOT (fr-registration.md Keputusan D): we copy name/role/
- * gender into registration_members; team_member_id is provenance only.
- * Mutations allowed only while the registration is editable (RULE-6).
- */
 class RegistrationMemberController extends Controller
 {
     public function store(StoreRegistrationMemberRequest $request, Registration $registration): RedirectResponse

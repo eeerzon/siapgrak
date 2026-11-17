@@ -9,13 +9,6 @@ use App\Models\Event;
 use App\Models\EventCategory;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * Categories are displayed on the event overview page (dashboard.events.show),
- * so there is no dedicated index view here — only mutations. Authorization is
- * gated through EventPolicy::manageCategories on the parent {event}
- * (fr-event-category.md Keputusan H — no separate EventCategoryPolicy, same as
- * TeamMemberController has no TeamMemberPolicy).
- */
 class EventCategoryController extends Controller
 {
     public function store(StoreEventCategoryRequest $request, Event $event): RedirectResponse
@@ -45,9 +38,6 @@ class EventCategoryController extends Controller
         $this->authorize('manageCategories', $event);
         $this->assertBelongsToEvent($event, $category);
 
-        // A category with registrations is competition history — the FK is
-        // RESTRICT, so surface a friendly error instead of a 500
-        // (fr-registration.md Keputusan I).
         if ($category->registrations()->exists()) {
             return $this->backToEvent($event, 'Kategori tidak bisa dihapus karena sudah punya pendaftaran.', 'error');
         }
@@ -57,10 +47,6 @@ class EventCategoryController extends Controller
         return $this->backToEvent($event, 'Kategori berhasil dihapus.');
     }
 
-    /**
-     * Defense against URL manipulation: {category} must belong to {event}
-     * from the route — same pattern as TeamMemberController.
-     */
     protected function assertBelongsToEvent(Event $event, EventCategory $category): void
     {
         abort_unless($category->event_id === $event->id, 404);

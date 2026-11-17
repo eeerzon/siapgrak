@@ -14,21 +14,13 @@ class StoreEventStaffRequest extends FormRequest
         return $this->user()->can('manageStaff', $this->route('event'));
     }
 
-    /**
-     * RULE-10: a staff member must be an active member of the event's owning
-     * organization — you cannot inject an arbitrary user as staff (matters
-     * once event_staff.role becomes an authz gate in a later sprint).
-     * RULE-11: one row per user per event.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $event = $this->route('event');
 
         $organizationMemberIds = $event->organization->users()
             ->wherePivot('status', Status::Active)
-            ->pluck('users.id');
+            ->pluck('users.id_user');
 
         return [
             'user_id' => [
@@ -40,9 +32,6 @@ class StoreEventStaffRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

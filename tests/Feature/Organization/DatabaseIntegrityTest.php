@@ -49,7 +49,7 @@ class DatabaseIntegrityTest extends TestCase
         // constraint lives in the schema, not just in application-level checks.
         \DB::table('organization_users')->insert([
             'organization_id' => $organization->id,
-            'user_id' => $user->id,
+            'user_id' => $user->id_user,
             'role' => OrganizationRole::Owner->value,
             'status' => Status::Active->value,
             'created_at' => now(),
@@ -65,7 +65,7 @@ class DatabaseIntegrityTest extends TestCase
 
         \DB::table('organization_users')->insert([
             'organization_id' => 999999,
-            'user_id' => $user->id,
+            'user_id' => $user->id_user,
             'role' => OrganizationRole::Member->value,
             'status' => Status::Active->value,
             'created_at' => now(),

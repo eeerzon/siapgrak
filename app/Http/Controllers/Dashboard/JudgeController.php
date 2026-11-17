@@ -12,12 +12,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-/**
- * Not in the global sidebar (CLAUDE.md keeps it fixed to Dashboard/Events/
- * Teams/Organization/Settings) — reachable via a link from the event's
- * "Penjurian" tab (fr-judging-setup.md Keputusan B). The routes/pages
- * themselves are a full resource, same pattern as TeamController.
- */
 class JudgeController extends Controller
 {
     public function __construct(protected JudgeService $judges) {}
@@ -83,13 +77,6 @@ class JudgeController extends Controller
             ->with('success', 'Data juri berhasil diperbarui.');
     }
 
-    /**
-     * Invalidates the old code immediately — plaintext by design so it can
-     * be redisplayed to hand to the judge (fr-scoring.md Keputusan B).
-     * access_code is deliberately NOT in Judge::$fillable (only this action
-     * may change it, never a generic form), so it's set directly rather than
-     * via mass assignment — same pattern as CompetitionEntry::status.
-     */
     public function regenerateAccessCode(Judge $judge): RedirectResponse
     {
         $this->authorize('update', $judge);

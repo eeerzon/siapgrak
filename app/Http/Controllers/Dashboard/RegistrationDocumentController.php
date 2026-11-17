@@ -11,11 +11,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/**
- * Documents live on the PRIVATE 'local' disk (storage/app/private). There is
- * no permanent public URL — download() is Policy-checked and streams the file
- * (fr-registration.md Keputusan E, security-baseline.md §File Upload).
- */
 class RegistrationDocumentController extends Controller
 {
     protected const DISK = 'local';
@@ -31,8 +26,6 @@ class RegistrationDocumentController extends Controller
             self::DISK,
         );
 
-        // file_path is set on the instance, not mass-assigned — it is a
-        // server-computed path, never request input.
         $document = new RegistrationDocument([
             'document_type' => $request->validated('document_type'),
             'title' => $request->validated('title'),

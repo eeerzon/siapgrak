@@ -6,7 +6,7 @@
 
 @php
     $variants = [
-        'primary' => 'bg-slate-800 text-white hover:bg-slate-900 focus-visible:outline-slate-800',
+        'primary' => 'bg-navy-900 text-white hover:bg-navy-800 focus-visible:outline-navy-600',
         'secondary' => 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:outline-slate-400',
         'danger' => 'bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600',
         'ghost' => 'text-slate-600 hover:bg-slate-100 focus-visible:outline-slate-400',

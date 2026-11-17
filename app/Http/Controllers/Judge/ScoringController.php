@@ -25,7 +25,7 @@ class ScoringController extends Controller
         $judge = $this->currentJudge($request);
         $entries = $this->scoreSheets->entriesForRound($round, $judge);
 
-        return view('judge.entries.index', compact('round', 'entries'));
+        return view('judge.entries.index', compact('judge', 'round', 'entries'));
     }
 
     public function show(Request $request, JudgingRound $round, CompetitionEntry $entry): View
@@ -35,7 +35,7 @@ class ScoringController extends Controller
         $criteria = $this->scoreSheets->scoreableCriteriaFor($round, $judge);
         $existingScores = $sheet->scores->keyBy('judging_criteria_id');
 
-        return view('judge.entries.show', compact('round', 'entry', 'sheet', 'criteria', 'existingScores'));
+        return view('judge.entries.show', compact('judge', 'round', 'entry', 'sheet', 'criteria', 'existingScores'));
     }
 
     public function store(SaveScoreDraftRequest $request, JudgingRound $round, CompetitionEntry $entry): RedirectResponse
@@ -58,8 +58,6 @@ class ScoringController extends Controller
         try {
             $this->scoreSheets->submit($sheet);
         } catch (IncompleteScoreSheet $e) {
-            // Surfaced as a form-validation error — same pattern as
-            // EventController::updateStatus for InvalidEventStatusTransition.
             throw ValidationException::withMessages(['submit' => $e->getMessage()]);
         }
 

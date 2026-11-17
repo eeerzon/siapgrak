@@ -12,12 +12,6 @@ class UpdateEventRequest extends FormRequest
         return $this->user()->can('update', $this->route('event'));
     }
 
-    /**
-     * organization_id is intentionally NOT editable — moving an event between
-     * organizers is out of scope for Sprint 3 (same as Team). RULE-2.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $event = $this->route('event');
@@ -38,9 +32,6 @@ class UpdateEventRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

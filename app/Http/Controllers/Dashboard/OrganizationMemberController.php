@@ -34,7 +34,7 @@ class OrganizationMemberController extends Controller
     {
         $user = User::where('email', $request->validated('email'))->firstOrFail();
 
-        if ($organization->memberships()->where('user_id', $user->id)->exists()) {
+        if ($organization->memberships()->where('user_id', $user->id_user)->exists()) {
             return back()->withErrors(['email' => 'User ini sudah jadi anggota organisasi.']);
         }
 
@@ -76,10 +76,6 @@ class OrganizationMemberController extends Controller
             ->with('success', 'Anggota berhasil dihapus.');
     }
 
-    /**
-     * Defense against URL manipulation: membership {membership} must actually
-     * belong to organization {organization} from the route, not just exist.
-     */
     protected function assertMembershipBelongsToOrganization(Organization $organization, OrganizationUser $membership): void
     {
         abort_unless($membership->organization_id === $organization->id, 404);

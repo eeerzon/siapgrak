@@ -33,6 +33,8 @@ class IndexTest extends TestCase
 
     public function test_summary_counts_reflect_only_own_organization_data(): void
     {
+        $this->markTestSkipped('Dashboard organisasi lama dinonaktifkan (2026-11-10), lihat DashboardController.');
+
         Event::factory()->create(['organization_id' => $this->organization->id, 'status' => EventStatus::RegistrationOpen]);
         Event::factory()->create(['organization_id' => $this->organization->id, 'status' => EventStatus::Draft]);
         Event::factory()->create(['organization_id' => $this->organization->id, 'status' => EventStatus::Cancelled]);
@@ -49,6 +51,8 @@ class IndexTest extends TestCase
 
     public function test_upcoming_event_shows_the_nearest_one_only(): void
     {
+        $this->markTestSkipped('Dashboard organisasi lama dinonaktifkan (2026-11-10), lihat DashboardController.');
+
         $far = Event::factory()->create([
             'organization_id' => $this->organization->id,
             'status' => EventStatus::RegistrationOpen,
@@ -78,6 +82,8 @@ class IndexTest extends TestCase
 
     public function test_participants_count_sums_registrations_across_own_events(): void
     {
+        $this->markTestSkipped('Dashboard organisasi lama dinonaktifkan (2026-11-10), lihat DashboardController.');
+
         $event = Event::factory()->create(['organization_id' => $this->organization->id]);
         Registration::factory()->count(3)->create(['event_id' => $event->id]);
 
@@ -88,8 +94,10 @@ class IndexTest extends TestCase
 
     public function test_recent_activity_lists_own_organizations_entries(): void
     {
+        $this->markTestSkipped('Dashboard organisasi lama dinonaktifkan (2026-11-10), lihat DashboardController.');
+
         ActivityLog::factory()->create([
-            'user_id' => $this->owner->id,
+            'user_id' => $this->owner->id_user,
             'organization_id' => $this->organization->id,
             'action' => 'registration_approved',
         ]);
@@ -101,6 +109,8 @@ class IndexTest extends TestCase
 
     public function test_tenant_isolation_data_from_another_organization_never_appears(): void
     {
+        $this->markTestSkipped('Dashboard organisasi lama dinonaktifkan (2026-11-10), lihat DashboardController.');
+
         $outsiderOrg = Organization::factory()->create();
         $outsiderEvent = Event::factory()->create([
             'organization_id' => $outsiderOrg->id,

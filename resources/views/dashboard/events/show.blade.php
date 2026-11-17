@@ -72,7 +72,7 @@
         <nav class="flex flex-nowrap items-center gap-1 overflow-x-auto border-b border-slate-200" aria-label="Detail event">
             @php($entryCount = $event->categories->sum(fn ($category) => $category->competitionEntries->count()))
             <button type="button" @click="tab = 'overview'"
-                    :class="tab === 'overview' ? 'border-sky-600 text-slate-800' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                    :class="tab === 'overview' ? 'border-brand-600 text-navy-900' : 'border-transparent text-slate-500 hover:text-slate-700'"
                     class="shrink-0 cursor-pointer border-b-2 px-3 py-2 text-sm font-medium transition-colors">
                 Overview
             </button>
@@ -89,7 +89,7 @@
                 'results' => 'Hasil',
             ] as $key => $label)
                 <button type="button" @click="tab = '{{ $key }}'"
-                        :class="tab === '{{ $key }}' ? 'border-sky-600 text-slate-800' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                        :class="tab === '{{ $key }}' ? 'border-brand-600 text-navy-900' : 'border-transparent text-slate-500 hover:text-slate-700'"
                         class="shrink-0 cursor-pointer border-b-2 px-3 py-2 text-sm font-medium transition-colors">
                     {{ $label }}
                 </button>
@@ -99,7 +99,7 @@
 
             {{-- OPERATIONS --}}
             <button type="button" @click="tab = 'staff'"
-                    :class="tab === 'staff' ? 'border-sky-600 text-slate-800' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                    :class="tab === 'staff' ? 'border-brand-600 text-navy-900' : 'border-transparent text-slate-500 hover:text-slate-700'"
                     class="shrink-0 cursor-pointer border-b-2 px-3 py-2 text-sm font-medium transition-colors">
                 Staff ({{ $event->staff->count() }})
             </button>

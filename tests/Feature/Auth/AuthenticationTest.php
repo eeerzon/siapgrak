@@ -60,7 +60,7 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)->post(route('logout'));
 
         $this->assertGuest();
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('home'));
     }
 
     public function test_guest_cannot_access_dashboard(): void
@@ -101,10 +101,10 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard.index'));
     }
 
-    public function test_guest_visiting_home_is_redirected_to_login(): void
+    public function test_guest_visiting_home_sees_the_public_homepage(): void
     {
         $response = $this->get('/');
 
-        $response->assertRedirect(route('login'));
+        $response->assertOk();
     }
 }

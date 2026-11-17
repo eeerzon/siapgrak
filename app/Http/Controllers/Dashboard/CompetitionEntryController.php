@@ -17,13 +17,6 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Entries themselves are never created here — CompetitionService creates them
- * from an approved Registration (fr-competition-entry.md Keputusan A). This
- * controller only assigns numbers and progresses the event-day status.
- * Gated through EventPolicy::manageCompetition — no separate CompetitionEntryPolicy
- * (Keputusan H, same pattern as Sprint 3/4).
- */
 class CompetitionEntryController extends Controller
 {
     public function __construct(

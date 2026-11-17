@@ -15,12 +15,6 @@ use App\Services\ResultService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Gated entirely behind manageResults (fr-awards-finalization.md Keputusan D
- * — refined from manageJudging in Sprint 11, same role check but its own
- * Phase E method) except reopening a published round, which needs the
- * privileged reopenPublishedResult (Keputusan B).
- */
 class ResultController extends Controller
 {
     public function __construct(protected ResultService $results) {}
@@ -80,9 +74,6 @@ class ResultController extends Controller
     {
         $event = $round->category->event;
 
-        // Reopening a PUBLISHED round needs Owner specifically (Keputusan B)
-        // — a merely-finalized round uses the same manageResults gate as
-        // every other Results action.
         $currentlyPublished = CompetitionResult::query()
             ->where('judging_round_id', $round->id)
             ->where('status', ResultStatus::Published)

@@ -9,12 +9,6 @@ use App\Models\Event;
 use App\Models\EventStaff;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * Staff are shown on the event overview page (dashboard.events.show) — only
- * mutations here. Gated through EventPolicy::manageStaff on the parent {event}
- * (fr-event-category.md Keputusan H). event_staff.role is recorded but is NOT
- * yet an authorization source (Keputusan A).
- */
 class EventStaffController extends Controller
 {
     public function store(StoreEventStaffRequest $request, Event $event): RedirectResponse

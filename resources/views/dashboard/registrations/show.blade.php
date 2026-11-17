@@ -53,7 +53,7 @@
                     </div>
                     <div>
                         <textarea name="review_notes" rows="2" placeholder="Alasan / catatan — wajib saat menolak atau minta revisi"
-                                  class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">{{ old('review_notes') }}</textarea>
+                                  class="block w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">{{ old('review_notes') }}</textarea>
                         @error('review_notes')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                 </form>

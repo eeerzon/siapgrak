@@ -12,9 +12,6 @@ class StoreAwardRequest extends FormRequest
         return $this->user()->can('manageResults', $this->route('event'));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $event = $this->route('event');
@@ -26,8 +23,6 @@ class StoreAwardRequest extends FormRequest
                 'nullable',
                 Rule::exists('event_categories', 'id')->where('event_id', $event->id),
             ],
-            // RULE-F (fr-awards-finalization.md): entry must belong to THIS
-            // event — cross-event linking would be a tenant-isolation gap.
             'competition_entry_id' => [
                 'nullable',
                 Rule::exists('competition_entries', 'id')->where('event_id', $event->id),
@@ -36,9 +31,6 @@ class StoreAwardRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

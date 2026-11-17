@@ -13,11 +13,6 @@ class UpdateEventStaffRequest extends FormRequest
         return $this->user()->can('manageStaff', $this->route('event'));
     }
 
-    /**
-     * user_id is fixed once assigned (RULE-11) — only role/status change here.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
@@ -25,9 +20,6 @@ class UpdateEventStaffRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

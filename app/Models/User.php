@@ -16,6 +16,8 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasPublicId, Notifiable;
 
+    protected $primaryKey = 'id_user';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -51,6 +53,14 @@ class User extends Authenticatable
             'password' => 'hashed',
             'status' => Status::class,
         ];
+    }
+
+    /**
+     * Referencing tables keep `user_id`; Laravel would otherwise guess `user_id_user`.
+     */
+    public function getForeignKey(): string
+    {
+        return 'user_id';
     }
 
     protected function publicIdPrefix(): string

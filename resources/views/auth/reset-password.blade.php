@@ -35,7 +35,7 @@
         </div>
 
         <button type="submit"
-                class="w-full rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50">
+                class="w-full rounded-md bg-navy-900 px-4 py-2 text-sm font-medium text-white hover:bg-navy-800 disabled:opacity-50">
             Reset Password
         </button>
     </form>

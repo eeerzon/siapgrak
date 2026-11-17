@@ -28,18 +28,13 @@ use App\Http\Controllers\Dashboard\TeamMemberController;
 use App\Http\Controllers\Judge\AccessController as JudgeAccessController;
 use App\Http\Controllers\Judge\DashboardController as JudgeDashboardController;
 use App\Http\Controllers\Judge\ScoringController as JudgeScoringController;
+use App\Http\Controllers\Site\HomeController;
 use App\Http\Middleware\EnsureJudgeSession;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    // Named "home" deliberately: Laravel's guest middleware falls back to
-    // route('home') when redirecting an already-authenticated user away from
-    // /login. If this always redirected to /login regardless of auth state,
-    // that fallback would create an infinite redirect loop for logged-in users.
-    return auth()->check()
-        ? redirect()->route('dashboard.index')
-        : redirect()->route('login');
-})->name('home');
+// Public homepage + platform admin content panel (ADR-003).
+Route::get('/', [HomeController::class, 'index'])->name('home');
+require __DIR__.'/content.php';
 
 // Auth — Phase A Sprint 1 prerequisite (see _docs/tasks/tasks.md). No public
 // event/registration/judging routes are defined anywhere in this file — out

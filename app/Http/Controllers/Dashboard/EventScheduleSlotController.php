@@ -10,12 +10,6 @@ use App\Models\EventScheduleSlot;
 use App\Services\ScheduleService;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * Unlike Event/Registration/CompetitionEntry, a schedule slot is pure
- * logistics — every field stays editable and hard delete is allowed
- * (fr-schedule.md Keputusan A/B). Gated through EventPolicy::manageSchedule,
- * no separate EventScheduleSlotPolicy (same pattern as prior sprints).
- */
 class EventScheduleSlotController extends Controller
 {
     public function __construct(protected ScheduleService $schedule) {}

@@ -19,6 +19,13 @@ Intake SEMUA request (bug, fitur, apapun). Diedit manual oleh Ersa saat brief ba
 
 ---
 
+## Halaman Utama Publik (ADR-003)
+
+- [x] **Beranda + konten admin platform** — SELESAI 2026-11-05. SRS: `srs/fr-public-content.md`. Info Lomba, Agenda, dan Prestasi & Kabar dengan panel admin. Event yang kita kelola menaut ke Kreenconnect lewat slug.
+- [ ] **Isi `KREENCONNECT_EVENT_BASE_URL`** — format URL halaman event Kreenconnect perlu dikonfirmasi.
+
+---
+
 ## ACTIVE — Siapgrak Admin v1
 
 Aturan wajib: setiap sprint dikerjakan sendiri-sendiri, tidak digabung. Instruksi coding harus eksplisit menyebut apa yang TIDAK diimplementasikan di sprint itu. Lihat `quality/definition-of-ready.md` dan Phase Gate Rule di bawah sebelum memulai sprint manapun.

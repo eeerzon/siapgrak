@@ -14,7 +14,7 @@
             <p class="text-base font-medium text-slate-700">Anda belum tergabung di organisasi manapun.</p>
             <p class="mt-1 text-sm text-slate-500">Buat organisasi untuk mulai mengelola event LKBB/Paskibra.</p>
             <a href="{{ route('dashboard.organizations.create') }}"
-               class="mt-4 inline-block rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
+               class="mt-4 inline-block rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
                 Buat Organisasi Pertama
             </a>
         </div>

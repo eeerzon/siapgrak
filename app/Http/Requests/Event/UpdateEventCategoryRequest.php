@@ -13,9 +13,6 @@ class UpdateEventCategoryRequest extends FormRequest
         return $this->user()->can('manageCategories', $this->route('event'));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $event = $this->route('event');
@@ -51,9 +48,6 @@ class UpdateEventCategoryRequest extends FormRequest
         });
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

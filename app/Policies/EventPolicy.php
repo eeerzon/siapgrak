@@ -126,9 +126,9 @@ class EventPolicy
     protected function membershipRole(User $user, Event $event): ?OrganizationRole
     {
         return Cache::store('array')->rememberForever(
-            "event-membership:{$user->id}:{$event->id}",
+            "event-membership:{$user->id_user}:{$event->id}",
             fn () => $event->organization->memberships()
-                ->where('user_id', $user->id)
+                ->where('user_id', $user->id_user)
                 ->where('status', Status::Active)
                 ->first()?->role,
         );

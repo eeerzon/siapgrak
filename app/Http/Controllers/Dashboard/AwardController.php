@@ -10,12 +10,6 @@ use App\Models\Event;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 
-/**
- * Managed inline on the event's "Hasil" tab (no dedicated index view) —
- * same pattern as EventCategoryController. Gated through
- * EventPolicy::manageResults, no separate AwardPolicy
- * (fr-awards-finalization.md Keputusan D).
- */
 class AwardController extends Controller
 {
     public function __construct(protected ActivityLogger $activityLogger) {}

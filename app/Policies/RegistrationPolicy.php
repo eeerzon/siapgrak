@@ -38,7 +38,7 @@ class RegistrationPolicy
     protected function membershipRole(User $user, Registration $registration): ?OrganizationRole
     {
         $membership = $registration->event->organization->memberships()
-            ->where('user_id', $user->id)
+            ->where('user_id', $user->id_user)
             ->where('status', Status::Active)
             ->first();
 

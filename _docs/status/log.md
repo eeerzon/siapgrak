@@ -4,6 +4,239 @@ Log per sesi kerja (WAJIB diupdate, lihat CLAUDE.md §"Status Update"). Entry ba
 
 ---
 
+## 2026-11-17 — Kriteria terkunci total setelah penilaian dimulai
+
+**Diselesaikan:**
+- Nomor tampil wajib saat menambah peserta (form dan validasi server). Form edit tidak berubah.
+- Kartu kriteria: setelah juri mulai menilai, tombol Edit disembunyikan dan kriteria hanya tampil sebagai info. Server menolak semua perubahan kriteria, termasuk nama dan keterangan yang sebelumnya masih boleh. Teks keterangan, test, SRS, dan panduan disesuaikan.
+- 489 test lolos, 5 skipped.
+
+---
+
+## 2026-11-17 — Halaman hasil publik pakai desain judge-mobile
+
+**Diselesaikan:**
+- `/info-lomba/{slug}/hasil` dibuat ulang sebagai halaman mandiri mengikuti `public_results_screen.dart`: hanya logo dan nama Siapgrak, warna dashboard admin (bar atas navy, konten terang, aksen merah) dengan tombol mode gelap opsional, kartu peserta (peringkat/SERI, kotak nomor, #nomor, nama, chip total juri, nilai akhir), tabel kriteria × juri berbobot dengan "maks", dan kartu "masih berlangsung" berikon.
+- Dicek di desktop dan HP, mode gelap dan terang. 488 test lolos.
+
+---
+
+## 2026-11-17 — Kendala penjurian diperjelas di layar
+
+**Diselesaikan:**
+- Juri: "Kirim Skor Final" langsung menyimpan dan mengirim, nonaktif sampai semua kriteria terisi (dengan jumlah yang kurang). Kode akses menerima huruf kecil, spasi, dan tanda hubung.
+- Admin:
+  - Daftar cek kesiapan per babak di tab Lembar Nilai (bobot, juri, peserta), dan catatan saat menugaskan juri ke babak yang belum siap.
+  - Daftar "Belum diperingkat" beserta alasan dan juri yang ditunggu di tab Hasil.
+  - Salin Link nonaktif selama Info Lomba draft; Buka ulang tampil nonaktif selama hasil publik.
+- Panduan `_docs/operations/alur-info-lomba-penjurian.md` disesuaikan.
+- 4 test baru. Total 488 lolos, 5 skipped.
+
+---
+
+## 2026-11-17 — Halaman peringkat publik & salin link
+
+**Diselesaikan:**
+- Halaman publik `/info-lomba/{slug}/hasil` mengikuti prototipe judge-mobile: peringkat, nomor, nama, total per juri (anonim), nilai akhir, dan rincian kriteria × juri.
+- Publikasi per babak (migrasi `2026_11_17_090001`, `competition_rounds.results_published_at`). Sebelum dipublikasikan, halaman menampilkan "masih berlangsung". Publikasi menghitung ulang dan ditolak kalau belum ada nilai lengkap. Hasil bisa ditarik lagi. Selama publik, lembar nilai babak itu tidak bisa dibuka ulang.
+- Tombol "Salin Link" di tab Lembar Nilai dan Hasil, muncul kalau sudah ada lembar terkirim, dengan peringatan kalau Info Lomba masih draft. Kalau Clipboard API gagal, sistem memakai `execCommand`, lalu meminta Ctrl+C.
+- Tautan "Lihat hasil penilaian" di detail Info Lomba publik kalau sudah ada babak yang diumumkan.
+- Demo: hasil Babak Final SMA "LKBB Garuda Muda Cup" sudah dipublikasikan untuk pengecekan.
+- 4 test baru. Total 484 lolos, 5 skipped.
+
+**Keputusan user:** nilai tampil publik setelah admin mempublikasikan, bukan langsung (live), sesuai CLAUDE.md.
+
+---
+
+## 2026-11-16 — Bobot kriteria wajib 100% dan terkunci setelah penilaian dimulai
+
+**Diselesaikan:**
+- Juri baru bisa menilai kalau total bobot babak tepat 100% dan semua kriteria berbobot. Bobot sekarang wajib diisi.
+- Setelah ada lembar nilai di sebuah babak, kriteria tidak bisa ditambah atau dihapus, dan bobot serta rentang nilai tidak bisa diubah. Nama dan keterangan masih boleh.
+- Admin melihat status per babak: "Belum siap · bobot X% dari 100%", "Siap dinilai", atau "Penilaian berjalan · kriteria terkunci". Kolom bobot kriteria baru otomatis terisi sisa bobot.
+- Juri melihat pemberitahuan "Babak ini belum bisa dinilai" dan tidak mendapat form nilai.
+- 3 test baru. Total 480 lolos, 5 skipped.
+
+**Alasan:** menambah kriteria berbobot 20% setelah total 100% membuat nilai akhir berskala 120, dan peserta dengan lembar yang sudah terkirim hilang dari peringkat karena tidak punya nilai untuk kriteria baru.
+
+---
+
+## 2026-11-16 — Penjurian pindah ke Info Lomba (tabel terpisah)
+
+**Diselesaikan:**
+- Modul penjurian baru yang terhubung ke `competition_listings`, dengan 10 tabel baru dan detail di `_docs/srs/fr-competition-judging.md`. Modul event lama tidak diubah.
+- Ruang kerja admin `/dashboard/content/competitions/{id}/judging` dengan tab Kategori & Peserta, Babak & Juri, Lembar Nilai (matriks peserta × juri, kunci, buka ulang dengan alasan), dan Hasil. Tombol "Penjurian" ada di detail Info Lomba, tab "Juri" di menu konten.
+- Panel Juri baru di `/juri` (login kode akses).
+- Seeder `CompetitionJudgingDemoSeeder`: demo lengkap di "LKBB Garuda Muda Cup" (milik admin1, juri `GRDA2345`/`GRDB3456`/`GRDC4567`) dan demo kecil di "Lomba Contoh Milik Admin 2" (juri `ADMN2345`). Sudah dijalankan di DB lokal.
+- Info Lomba yang sudah punya data penjurian tidak bisa dihapus.
+- 9 test baru. Total 477 lolos, 5 skipped.
+
+**Perubahan yang perlu diketahui:** prefix panel juri lama di `routes/web.php` sempat diubah ke `juri`, sehingga bentrok dengan panel baru. Prefix itu dikembalikan ke `judge`; `/juri` sekarang milik panel penjurian Info Lomba.
+
+**Belum:** halaman event lama (`/dashboard/events/{id}`) tidak dipercantik karena data event diabaikan dulu. Fungsinya sudah digantikan ruang kerja penjurian di Info Lomba.
+
+---
+
+## 2026-11-16 — Data demo penjurian & tampilan Panel Juri
+
+**Diselesaikan:**
+- Seeder baru `JudgingDemoSeeder`: organisasi "Panitia Demo LKBB Garuda" (admin platform pertama owner, sisanya admin), event "LKBB Garuda Muda Cup (Demo)" berstatus ongoing, 2 kategori, 10 tim dan peserta bernomor tampil, babak final dengan 4 kriteria berbobot, dan 3 juri dengan kode tetap (`JURYA234`, `JURYB345`, `JURYC456`). Juri ketiga hanya ditugaskan ke kriteria Kepemimpinan Danton. Lembar nilai dibuat campuran draft, terkirim, dan dikunci. Sudah dijalankan di DB lokal (cadangan disimpan dulu).
+- Panel Juri (`/judge`) mengikuti gaya baru (navy-merah, ramah HP):
+  - halaman masuk dengan input kode besar;
+  - beranda berisi progres per babak;
+  - daftar peserta dengan nomor tampil, status tampil berbahasa Indonesia, dan chip status lembar nilai (Belum dinilai / Draft x/y / Terkirim / Dikunci);
+  - form nilai dengan input angka besar, bobot, deskripsi kriteria, catatan yang bisa dilipat, dan bar aksi tetap di bawah.
+- Pengaman baru: "Kirim Skor Final" ditahan kalau masih ada ketikan yang belum disimpan sebagai draft. Sebelumnya ketikan itu hilang diam-diam karena kirim memakai form terpisah.
+- `ScoreSheetService`: `entriesForRound` menyertakan `sheet_status`, `assignedRounds` menyertakan `entries_count` dan `sent_count`. `label()` Indonesia di `CompetitionEntryStatus` dan `ScoreSheetStatus`. Tab halaman event memakai warna brand.
+
+**Catatan:**
+- Halaman panitia untuk penjurian (`/dashboard/events/{id}` tab Penjurian, `/dashboard/judges`) tidak ada di menu sejak Events diarahkan ke konten, jadi hanya bisa dibuka lewat URL. Label status di sana masih bahasa Inggris (Submitted, Active, dan seterusnya).
+- Membuka halaman peserta di Panel Juri otomatis membuat lembar nilai draft kosong (perilaku lama).
+
+---
+
+## 2026-11-16 — Pagination info lomba, infinite scroll & poster agenda
+
+**Diselesaikan:**
+- `/info-lomba`: 8 per halaman dengan pagination.
+- `/agenda`: tampil 8 dulu, lalu 8 berikutnya dimuat hanya setelah pengunjung scroll (scroll, wheel, sentuh, atau keyboard, jadi tetap jalan di layar yang tidak bisa di-scroll). Tanpa tombol atau link pagination, sesuai permintaan. Kalau gagal memuat, scroll berikutnya mencoba lagi (`site/partials/infinite-scroll-script.blade.php`).
+- View pagination berbahasa Indonesia (`partials/pagination.blade.php`) dipakai di situs publik dan daftar konten admin. Bawaan Laravel berbahasa Inggris dan ikut mode gelap perangkat. `APP_LOCALE` sengaja tidak diubah ke `id` karena folder `lang/` belum ada.
+- Agenda punya poster 4:5: migrasi `2026_11_16_090001` (`agenda_items.cover_path`), upload di form admin (validasi rasio 4:5, file dihapus ikut agenda), dan detail agenda publik dengan poster di kiri dan kartu info di kanan.
+- Seeder baru `PaginationDemoSeeder` (create-only): 6 lomba dan 12 agenda dengan poster 4:5 bergambar (gradien, pita merah-putih, judul, tanggal). Sudah dijalankan di DB lokal, cadangan DB disimpan sebelumnya.
+- 4 test baru. Total 468 lolos, 5 skipped.
+
+---
+
+## 2026-11-16 — Audit halaman, tampilan publik, pencarian, halaman error
+
+**Audit:** semua halaman publik, auth, dan konten dashboard dicek di desktop dan HP (error JS, gambar rusak, scroll horizontal, status HTTP, parameter aneh).
+
+**Bug yang diperbaiki:**
+- `?q[]=x`, `?jenjang[]=x`, dan `?tipe[]=x` membuat error 500. Sekarang ditangani `Controller::queryText()`, yang hanya menerima string.
+- Di HP, baris agenda melebar keluar layar (item grid tanpa `min-w-0`).
+- 403/404/419/429/500/503 masih halaman bawaan Laravel berbahasa Inggris. Sekarang ada `resources/views/errors/*` berbahasa Indonesia, dengan layout yang berdiri sendiri (tidak butuh DB/auth).
+
+**Tampilan:**
+- Warna brand diambil dari logo (`brand-*` merah, `navy-*`) di `app.css`, menggantikan biru `sky` di situs publik, shell dashboard, login, dan tombol utama.
+- Header sticky dengan garis merah, menu aktif bergaris merah, dan footer navy berisi link dan Instagram.
+- Beranda: hero dengan kotak cari, jumlah lomba yang masih buka dan agenda mendatang, poster lomba terdekat, dan garis merah-putih ala poster.
+- Kartu lomba, agenda, dan kabar: tanggal agenda bergaya kalender, status pendaftaran memakai titik, efek hover.
+- Teks di beranda, intro halaman, empty state, dan tombol pendaftaran ditulis ulang.
+
+**Pencarian:**
+- `/agenda?q=` (judul, lokasi, deskripsi) dan `/kabar?q=` (judul, ringkasan, isi), otomatis seperti `/info-lomba`.
+- Panel admin Info Lomba, Agenda, dan Kabar: kotak cari, dengan `withQueryString` di pagination.
+- Scope bersama `search()` di `IsPublicContent`.
+
+**Test:** 4 test baru (pencarian publik, parameter array, 404 Indonesia, pencarian admin). Total 464 lolos, 5 skipped.
+
+**Perlu keputusan:**
+- `<title>` di layout publik dan dashboard sengaja di-comment jadi "Siapgrak" saja, sehingga semua tab sama. Disarankan dikembalikan per halaman (SEO dan pengalaman berbagi link).
+- User yang login dialihkan dari `/` ke dashboard, jadi admin tidak bisa melihat beranda publik.
+- Link "Daftar" di halaman login membuka registrasi untuk siapa saja. Akun baru hanya melihat dashboard kosong.
+- Poster demo berupa gradien polos. Ganti dengan poster asli sebelum demo.
+
+---
+
+## 2026-11-13 — Body lomba 9 & 10 tertimpa seeder, dipulihkan
+
+**Kejadian:** editan body manual (lewat DB Browser) di `competition_listings` id 9 dan 10 hilang. Penyebabnya: pada 2026-11-10 `InstagramCompetitionSeeder` dan `PublicContentDemoSeeder` dijalankan ulang untuk mengetes perbaikan `orderBy('id_user')`, dan keduanya menimpa record yang judulnya sama (`firstOrNew` + `forceFill`).
+
+**Diselesaikan:**
+- Body id 9 dan 10 dipulihkan dari cadangan DB sebelum migrasi 2026-11-10. Kolom lain, agenda, dan kabar dicek tidak ikut berubah (selain tanggal data demo yang memang relatif terhadap hari ini).
+- Kedua seeder sekarang hanya membuat record yang belum ada dan tidak pernah menimpa data yang sudah ada. Sudah diuji pada salinan DB.
+
+**Catatan:** seeder tidak lagi memperbarui tanggal data demo saat dijalankan ulang. Untuk data demo yang segar, hapus dulu record-nya.
+
+---
+
+## 2026-11-10 — Primary key `users` jadi `id_user`, logo dashboard, menu Events = konten
+
+**Diselesaikan:**
+- Migrasi `2026_11_10_090001`: `users.id` di-rename menjadi `id_user`. FK di tabel lain tetap bernama `user_id`/`created_by`/dst, hanya referensinya yang ikut pindah ke `users.id_user` (MySQL 8 dan SQLite otomatis).
+- `User`: `$primaryKey = 'id_user'`, `getForeignKey()` tetap `user_id`. Tidak ada alias `id`, jadi `$user->id` kini null.
+- Semua pemakaian id user diganti ke `id_user`: query mentah `users.id` (`StoreEventStaffRequest`, `EventController@show`), policy (Event/Judge/Organization/Registration/Team/PublicContent), service (Event/Organization/Registration), controller (OrganizationMember, ScoreSheet, konten), scope `ownedBy`, view `staff.blade.php`, dua seeder konten, dan 48 baris test. Daftarnya dikumpulkan dengan mencatat setiap akses `$user->id` selama seluruh test berjalan, lalu dicek ulang sampai nol.
+- Logo Siapgrak di sidebar desktop dan topbar mobile dashboard.
+- 462 test hijau (MySQL), Pint lolos. DB lokal sudah dimigrasi, login dan pemisahan data admin2 dicek di browser.
+- Menu dashboard (permintaan user, berlaku untuk semua user): **Events** sekarang membuka halaman konten (Info Lomba / Agenda / Prestasi & Kabar), menu "Konten" terpisah dihapus (desktop dan menu Lainnya di HP). Link ke modul event panitia lama (`dashboard.events.*`) dan **Teams** di-comment di sidebar dan nav HP; route dan kodenya tetap ada. Judul halaman konten jadi "Events".
+- `/dashboard` untuk semua user: view baru `dashboard/content-overview.blade.php`, berisi ringkasan konten milik user yang login (lomba tayang/draft, pendaftaran dibuka, agenda mendatang, prestasi & kabar), 5 lomba terdekat, dan 5 agenda terdekat. Tombol "+ Tambah Info Lomba" hanya untuk admin platform. Dashboard organisasi lama (`dashboard.index`) di-comment di `DashboardController`, view-nya tidak dihapus, dan 5 test-nya di `IndexTest` ditandai skipped.
+- Test baru `tests/Feature/Dashboard/ContentOverviewTest.php` (3 test). Test lama "link Konten hanya untuk admin" diganti jadi "menu Events menuju konten untuk semua user". Total 465 test hijau.
+
+**Keputusan yang perlu dikonfirmasi Ersa:** CLAUDE.md menetapkan sidebar `Dashboard / Events / Teams / Organization / Settings` dengan Events = modul event panitia. Sekarang Events = konten publik dan Teams disembunyikan. User organizer non-admin yang klik Events akan mendapat 403.
+
+**Catatan:** sesi login yang aktif sebelum migrasi mungkin perlu login ulang. Kode baru wajib memakai `$user->id_user` atau `$user->getKey()`; `$user->id` mengembalikan null tanpa error.
+
+---
+
+## 2026-11-09 — Info lomba: poster 4:5, filter, contact person
+
+**Diselesaikan:**
+- Migrasi baru `2026_11_09_090001`: `competition_listings.levels` (json), `province`, `registration_deadline`, `contact_persons` (json). Migrasi lama tidak diubah.
+- Form admin: poster wajib 4:5, jenjang (checkbox), provinsi, batas pendaftaran, 3 slot contact person. "Link Info Resmi" diganti "Link Pendaftaran".
+- `/info-lomba`: filter kata kunci, jenjang, provinsi, dan "pendaftaran dibuka". Kartu ringkas 4:5, detail lengkap dengan tombol contact person ke WhatsApp. Beranda menampilkan 4 lomba.
+- Seeder demo ikut diisi kolom baru dan poster 4:5, lalu dijalankan di database lokal.
+- Pendaftaran tutup: tombol link/Kreenconnect/contact person disembunyikan, diganti info "Pendaftaran sudah ditutup".
+- Filter `/info-lomba` berjalan otomatis (dropdown/checkbox langsung, pencarian setelah 500 ms berhenti mengetik); tombol Cari hanya tampil tanpa JavaScript. Semua `<select>` di aplikasi memakai panah sendiri dengan jarak `pr-10` (`app.css`, `x-ui.select`, status kategori di workspace event).
+
+- `InstagramCompetitionSeeder` (terpisah dari demo fiktif): LKBB Puncak Berbaris Jilid 1 dan LKBB Mirovement Season 7, caption disalin persis dari screenshot feed siapgrak.id. Poster dipotong dari screenshot dan disimpan di `database/seeders/assets/instagram/`.
+- Migrasi `2026_11_09_090002`: `technical_meeting_date` + `technical_meeting_location` (opsional). Di detail publik baris "Technical Meeting" hanya tampil kalau tanggalnya terisi.
+- Kepemilikan konten: migrasi `2026_11_09_090003` mengganti nama `created_by` → `id_user` di `competition_listings`, `agenda_items`, `community_posts`. List admin hanya menampilkan konten milik user yang login; akses ke milik admin lain 403 (`PublicContentPolicy`). Seeder mengisi `id_user` dengan admin platform pertama.
+- Lokal saja: user `admin2@admin.com` (password `password`, admin platform) dengan 1 lomba, 1 agenda, 1 kabar untuk cek pembeda data. `users.id` sengaja tidak diganti nama (menunggu keputusan).
+- Logo siapgrak.id (dipotong dari screenshot profil Instagram, ±460 px) di `public/images/`: header situs publik, halaman login/register, dan favicon semua layout (`partials/head-icons`).
+
+**Blocker:** Instagram tidak bisa diakses dari sesi ini, jadi konten diambil dari screenshot yang dikirim tim. Logo dan poster masih resolusi screenshot; ganti dengan file asli kalau tersedia.
+
+**Verifikasi:** 459 feature test hijau di MySQL · Pint pass · screenshot desktop dan mobile (390px, tanpa scroll horizontal).
+
+---
+
+## 2026-11-06 — Detail info lomba di panel admin
+
+**Diselesaikan:**
+- Halaman baru `dashboard.content.competitions.show`. Row tabel dan kartu mobile di list info lomba bisa diklik untuk membukanya; link dan tombol aksi di dalam row tetap berjalan sendiri.
+- Judul di list sekarang mengarah ke detail, bukan ke form edit.
+
+**Tidak diubah:** list agenda dan kabar komunitas.
+
+---
+
+## 2026-11-06 — Warna dashboard mengikuti beranda + perbaikan padding input
+
+**Diselesaikan:**
+- Sidebar, topbar mobile, dan halaman auth memakai warna gelap `slate-900` seperti hero beranda, dengan aksen `sky`. Tombol utama ikut `slate-900`.
+- Aturan dasar field di `resources/css/app.css`. Root cause: input manual (login, register, reset password, organisasi) tidak punya class padding/lebar border, sehingga tampil tanpa keduanya setelah reset Tailwind.
+- Padding field standar naik ke `px-3.5 py-2.5`. Field ringkas dengan padding sendiri tidak berubah.
+- `admin@admin.com` di database lokal dijadikan admin platform.
+
+**Tidak diubah:** header area juri (`layouts/judge`).
+
+**Verifikasi:** Pint pass · 448 feature test hijau di MySQL · dicek lewat screenshot (list dan form admin, organisasi, login, tampilan mobile).
+
+---
+
+## 2026-11-05 — Halaman Utama Publik + Konten Admin Platform (ADR-003)
+
+**Progress:** Fitur selesai dan terverifikasi. Belum di-commit.
+
+**Diselesaikan:**
+- Beranda publik di `/` dengan halaman list dan detail untuk Info Lomba, Agenda, serta Prestasi & Kabar.
+- Panel admin di `/dashboard/content`, dengan menu "Konten" yang hanya tampil untuk admin platform.
+- Kolom `users.is_platform_admin` + command `siapgrak:platform-admin`.
+- Flag `is_managed` + `kreen_slug` pada Info Lomba, dengan tombol ke Kreenconnect. Tidak ada data transaksi yang disimpan.
+- ADR-003 dan `srs/fr-public-content.md`.
+
+**File lama yang diubah:** `routes/web.php` (route `/`), `sidebar.blade.php` dan `account-menu.blade.php` (menu Konten), `AuthenticationTest` (perilaku `/` untuk tamu), `.env.example`.
+
+**Verifikasi:** Pint pass · 448 feature test hijau di MySQL (port 8065) dan SQLite · dicek lewat screenshot Chrome headless (beranda desktop dan mobile, detail, list dan form admin).
+
+**Keputusan/blocker:**
+- `KREENCONNECT_EVENT_BASE_URL` belum diketahui. Sampai diisi, tombol daftar tidak tampil.
+- `CLAUDE.md` masih memuat larangan halaman publik dan aturan sidebar lama. Perlu diselaraskan dengan ADR-003 oleh Ersa.
+
+**Next steps:** jalankan setup di `srs/fr-public-content.md`, lalu commit.
+
+---
+
 ## 2026-09-16 — Frontend F12 (Responsive + UX Audit) — FRONTEND F0-F12 TUNTAS 13/13 STEP
 
 **Progress:** **Frontend F0-F12 SELESAI SEMUA** (13/13 step). Lanjutan langsung dari F11 di sesi yang sama, dipilih atas instruksi "lanjut" — F12 adalah step TERAKHIR di build order.

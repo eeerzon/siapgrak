@@ -50,7 +50,7 @@ class CreateEventTest extends TestCase
         $response->assertRedirect(route('dashboard.events.show', $event));
 
         $this->assertSame($organization->id, $event->organization_id);
-        $this->assertSame($user->id, $event->created_by);
+        $this->assertSame($user->id_user, $event->created_by);
         $this->assertSame(EventStatus::Draft, $event->status);
         $this->assertNull($event->published_at);
         $this->assertNotEmpty($event->slug);

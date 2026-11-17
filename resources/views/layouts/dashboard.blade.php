@@ -3,8 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Dashboard') — Siapgrak</title>
+    <!-- <title>@yield('title', 'Dashboard') — Siapgrak</title> -->
+    <title>Siapgrak</title>
     @include('partials.head-fonts')
+    @include('partials.head-icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="overflow-x-hidden bg-slate-50 text-slate-900 antialiased">

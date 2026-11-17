@@ -50,7 +50,7 @@ class RegistrationService
             'event_category_id' => $eventCategoryId,
             'team_id' => $teamId,
         ]);
-        $registration->submitted_by = $enteredBy->id;
+        $registration->submitted_by = $enteredBy->id_user;
         $registration->status = RegistrationStatus::Draft;
         $registration->save();
 
@@ -81,7 +81,7 @@ class RegistrationService
 
         if (in_array($to, self::REVIEW_OUTCOMES, true)) {
             $registration->reviewed_at = now();
-            $registration->reviewed_by = $actor->id;
+            $registration->reviewed_by = $actor->id_user;
             $registration->review_notes = $reviewNotes;
         }
 

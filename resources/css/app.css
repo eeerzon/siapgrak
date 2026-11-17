@@ -26,6 +26,20 @@
        component docs. Components use the underlying Tailwind slate/sky/etc.
        utilities directly (bg-slate-50, text-slate-900, border-slate-200, ...)
        per the mapping documented in frontend-plan.md §Color Tokens. */
+
+    /* Public site brand, taken from the siapgrak.id logo: flag red + navy. */
+    --color-brand-50: #fdf1f2;
+    --color-brand-100: #fbe0e3;
+    --color-brand-500: #e0283f;
+    --color-brand-600: #c8102e;
+    --color-brand-700: #a30c25;
+    --color-navy-50: #f1f4fa;
+    --color-navy-100: #e1e7f3;
+    --color-navy-600: #2c4277;
+    --color-navy-700: #1f3263;
+    --color-navy-800: #16244b;
+    --color-navy-900: #0e1838;
+    --color-navy-950: #08102a;
 }
 
 @layer base {
@@ -39,6 +53,34 @@
 
     [x-cloak] {
         display: none !important;
+    }
+
+    /*
+     * Default for every text-style field, including hand-written ones. Tailwind's
+     * reset removes field borders and padding, so a field with only border colour
+     * classes would otherwise render with neither. Utilities still override this.
+     */
+    input:not([type='checkbox'], [type='radio'], [type='hidden'], [type='range'], [type='color']),
+    select,
+    textarea {
+        @apply rounded-md border border-slate-300 bg-white px-3.5 py-2.5;
+    }
+
+    /*
+     * Own chevron instead of the native arrow, which sits flush against the
+     * right border. Selects that set their own padding should keep pr-10.
+     */
+    select:not([multiple]) {
+        @apply appearance-none bg-no-repeat pr-10;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-size: 1.25rem;
+    }
+
+    input:not([type='checkbox'], [type='radio'], [type='hidden'], [type='range'], [type='color']):focus,
+    select:focus,
+    textarea:focus {
+        @apply border-sky-600 outline-2 outline-offset-0 outline-sky-600/30;
     }
 
     @media (prefers-reduced-motion: reduce) {

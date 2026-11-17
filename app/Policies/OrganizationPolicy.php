@@ -52,7 +52,7 @@ class OrganizationPolicy
     protected function membershipRole(User $user, Organization $organization): ?OrganizationRole
     {
         $membership = $organization->memberships()
-            ->where('user_id', $user->id)
+            ->where('user_id', $user->id_user)
             ->where('status', Status::Active)
             ->first();
 

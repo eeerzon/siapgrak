@@ -12,7 +12,7 @@
                 <div>
                     <label for="document_type" class="block text-sm font-medium text-slate-700">Jenis Dokumen</label>
                     <input id="document_type" name="document_type" list="doc-types" required
-                           class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
+                           class="mt-1 block w-full rounded-md border border-slate-300 px-3.5 py-2.5 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500">
                     <datalist id="doc-types">
                         <option value="surat_tugas"></option>
                         <option value="kartu_pelajar"></option>

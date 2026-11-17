@@ -37,7 +37,18 @@ class ScoreSheetService
             ->whereHas('assignments', fn ($query) => $query->where('judge_id', $judge->id))
             ->with('category.event')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->each(function (JudgingRound $round) use ($judge): void {
+                // Progress for the judge's home screen: entries to score vs sheets already sent.
+                $round->setAttribute('entries_count', CompetitionEntry::query()
+                    ->where('event_category_id', $round->event_category_id)
+                    ->whereNotIn('status', [CompetitionEntryStatus::Withdrawn, CompetitionEntryStatus::Disqualified])
+                    ->count());
+                $round->setAttribute('sent_count', $round->scoreSheets()
+                    ->where('judge_id', $judge->id)
+                    ->whereIn('status', [ScoreSheetStatus::Submitted, ScoreSheetStatus::Locked])
+                    ->count());
+            });
     }
 
     public function assertJudgeAssignedToRound(JudgingRound $round, Judge $judge): void
@@ -92,15 +103,22 @@ class ScoreSheetService
             ->groupBy('score_sheets.competition_entry_id')
             ->pluck('scored', 'score_sheets.competition_entry_id');
 
+        $sheetStatuses = ScoreSheet::query()
+            ->where('judging_round_id', $round->id)
+            ->where('judge_id', $judge->id)
+            ->pluck('status', 'competition_entry_id');
+
         return CompetitionEntry::query()
             ->where('event_category_id', $round->event_category_id)
             ->whereNotIn('status', [CompetitionEntryStatus::Withdrawn, CompetitionEntryStatus::Disqualified])
             ->with('team')
             ->orderBy('competition_number')
             ->get()
-            ->each(function (CompetitionEntry $entry) use ($scoredCounts, $scoreableCriteriaIds) {
+            ->each(function (CompetitionEntry $entry) use ($scoredCounts, $scoreableCriteriaIds, $sheetStatuses) {
                 $entry->setAttribute('scored_count', $scoredCounts->get($entry->id, 0));
                 $entry->setAttribute('total_criteria', $scoreableCriteriaIds->count());
+                // This judge's sheet status (null = not opened yet), so the list can tell drafts from sent sheets.
+                $entry->setAttribute('sheet_status', $sheetStatuses->get($entry->id));
             });
     }
 

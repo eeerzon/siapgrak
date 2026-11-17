@@ -34,7 +34,7 @@ class EventService
     {
         $event = new Event($data);
         $event->organization_id = $organizationId;
-        $event->created_by = $creator->id;
+        $event->created_by = $creator->id_user;
         $event->status = EventStatus::Draft;
         $event->save();
 

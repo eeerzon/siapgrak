@@ -4,11 +4,6 @@ namespace App\Exceptions;
 
 use RuntimeException;
 
-/**
- * Thrown by ResultService::finalize()/publish()/reopen() when the round has
- * no competition_results rows yet — organizer must run "Hitung Ulang Hasil"
- * at least once first.
- */
 class NoResultsForRound extends RuntimeException
 {
     public function __construct()

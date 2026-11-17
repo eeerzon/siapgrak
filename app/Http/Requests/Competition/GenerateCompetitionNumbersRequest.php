@@ -12,9 +12,6 @@ class GenerateCompetitionNumbersRequest extends FormRequest
         return $this->user()->can('manageCompetition', $this->route('event'));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $event = $this->route('event');
@@ -30,9 +27,6 @@ class GenerateCompetitionNumbersRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

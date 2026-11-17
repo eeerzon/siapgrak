@@ -2,11 +2,6 @@
 
 namespace App\Enums;
 
-/**
- * Event-day lifecycle of a competition entry. Transitions are explicit —
- * see the allowed-transition map in CompetitionService::changeStatus() and
- * fr-competition-entry.md Keputusan G.
- */
 enum CompetitionEntryStatus: string
 {
     case Registered = 'registered';
@@ -17,4 +12,18 @@ enum CompetitionEntryStatus: string
     case Finished = 'finished';
     case Withdrawn = 'withdrawn';
     case Disqualified = 'disqualified';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Registered => 'Terdaftar',
+            self::CheckedIn => 'Sudah registrasi ulang',
+            self::Ready => 'Siap tampil',
+            self::OnDeck => 'Bersiap',
+            self::Performing => 'Sedang tampil',
+            self::Finished => 'Selesai tampil',
+            self::Withdrawn => 'Mengundurkan diri',
+            self::Disqualified => 'Didiskualifikasi',
+        };
+    }
 }

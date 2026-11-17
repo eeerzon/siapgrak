@@ -19,7 +19,7 @@
                 <x-ui.select name="user_id" label="Anggota" required>
                     <option value="">Pilih anggota</option>
                     @foreach ($eligibleStaffUsers as $user)
-                        <option value="{{ $user->id }}" @selected((string) old('user_id') === (string) $user->id)>{{ $user->name }}</option>
+                        <option value="{{ $user->id_user }}" @selected((string) old('user_id') === (string) $user->id_user)>{{ $user->name }}</option>
                     @endforeach
                 </x-ui.select>
                 <x-ui.select name="role" label="Peran" required>

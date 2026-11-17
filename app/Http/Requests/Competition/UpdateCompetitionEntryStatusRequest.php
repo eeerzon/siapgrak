@@ -13,9 +13,6 @@ class UpdateCompetitionEntryStatusRequest extends FormRequest
         return $this->user()->can('manageCompetition', $this->route('entry')->event);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
@@ -23,9 +20,6 @@ class UpdateCompetitionEntryStatusRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

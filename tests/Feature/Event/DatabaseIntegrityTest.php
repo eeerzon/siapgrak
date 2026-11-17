@@ -27,7 +27,7 @@ class DatabaseIntegrityTest extends TestCase
         $event = Event::factory()->create();
         $category = $event->categories()->create(['name' => 'Doomed Category']);
         $staffUser = User::factory()->create();
-        $staff = $event->staff()->create(['user_id' => $staffUser->id, 'role' => EventStaffRole::Viewer]);
+        $staff = $event->staff()->create(['user_id' => $staffUser->id_user, 'role' => EventStaffRole::Viewer]);
 
         $event->delete();
 
@@ -65,10 +65,10 @@ class DatabaseIntegrityTest extends TestCase
     {
         $event = Event::factory()->create();
         $user = User::factory()->create();
-        EventStaff::factory()->create(['event_id' => $event->id, 'user_id' => $user->id]);
+        EventStaff::factory()->create(['event_id' => $event->id, 'user_id' => $user->id_user]);
 
         $this->expectException(QueryException::class);
-        EventStaff::factory()->create(['event_id' => $event->id, 'user_id' => $user->id]);
+        EventStaff::factory()->create(['event_id' => $event->id, 'user_id' => $user->id_user]);
     }
 
     public function test_event_gets_an_auto_assigned_public_id(): void

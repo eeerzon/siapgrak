@@ -52,7 +52,10 @@ KREENCONNECT_API_BASE_URL       (placeholder, belum ada endpoint resmi — lihat
 KREENCONNECT_API_CLIENT_ID
 KREENCONNECT_API_CLIENT_SECRET
 KREENCONNECT_WEBHOOK_SECRET     (kalau webhook dipakai)
+KREENCONNECT_EVENT_BASE_URL     (URL halaman event Kreenconnect tanpa slug, tombol daftar Info Lomba, ADR-003)
 ```
+
+Setelah deploy pertama ADR-003: jalankan `php artisan storage:link` untuk gambar sampul, lalu `php artisan siapgrak:platform-admin <email>` untuk menetapkan admin konten.
 
 Daftar ini akan bertambah seiring Phase 0-6 dikerjakan — update dokumen ini setiap ada env var baru (lihat `quality/definition-of-done.md`).
 

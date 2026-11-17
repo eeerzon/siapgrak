@@ -13,9 +13,6 @@ class StoreEventCategoryRequest extends FormRequest
         return $this->user()->can('manageCategories', $this->route('event'));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $event = $this->route('event');
@@ -32,8 +29,6 @@ class StoreEventCategoryRequest extends FormRequest
             'max_members' => ['nullable', 'integer', 'min:1'],
             'registration_start_at' => ['nullable', 'date'],
             'registration_end_at' => ['nullable', 'date', 'after_or_equal:registration_start_at'],
-            // status toggle (active/inactive) deferred to a later sprint — new
-            // categories are always active (DB default). See fr-event-category.md.
             'display_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
@@ -50,9 +45,6 @@ class StoreEventCategoryRequest extends FormRequest
         });
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

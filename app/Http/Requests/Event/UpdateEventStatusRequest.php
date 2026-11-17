@@ -13,12 +13,6 @@ class UpdateEventStatusRequest extends FormRequest
         return $this->user()->can('updateStatus', $this->route('event'));
     }
 
-    /**
-     * Only checks the value is a known status. Whether the transition itself
-     * is allowed is decided by EventService::changeStatus() (Keputusan B).
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
@@ -26,9 +20,6 @@ class UpdateEventStatusRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [

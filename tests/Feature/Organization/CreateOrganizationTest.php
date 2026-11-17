@@ -42,7 +42,7 @@ class CreateOrganizationTest extends TestCase
 
         $this->assertDatabaseHas('organization_users', [
             'organization_id' => $organization->id,
-            'user_id' => $user->id,
+            'user_id' => $user->id_user,
             'role' => OrganizationRole::Owner->value,
             'status' => Status::Active->value,
         ]);

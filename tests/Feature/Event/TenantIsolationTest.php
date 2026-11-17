@@ -92,12 +92,12 @@ class TenantIsolationTest extends TestCase
     {
         $this->actingAs($this->userA)
             ->post(route('dashboard.events.staff.store', $this->eventB), [
-                'user_id' => $this->userA->id,
+                'user_id' => $this->userA->id_user,
                 'role' => EventStaffRole::EventAdmin->value,
             ])
             ->assertForbidden();
 
-        $this->assertDatabaseMissing('event_staff', ['event_id' => $this->eventB->id, 'user_id' => $this->userA->id]);
+        $this->assertDatabaseMissing('event_staff', ['event_id' => $this->eventB->id, 'user_id' => $this->userA->id_user]);
     }
 
     public function test_event_index_only_shows_events_from_own_organizations(): void

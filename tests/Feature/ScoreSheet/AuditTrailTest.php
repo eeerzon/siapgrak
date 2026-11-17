@@ -94,7 +94,7 @@ class AuditTrailTest extends TestCase
         $this->actingAs($this->owner)->post(route('dashboard.score-sheets.reopen', $sheet), ['reason' => 'Koreksi']);
 
         $revision = ScoreSheetRevision::where('score_sheet_id', $sheet->id)->firstOrFail();
-        $this->assertSame($this->owner->id, $revision->requested_by);
+        $this->assertSame($this->owner->id_user, $revision->requested_by);
 
         $this->owner->delete();
 
