@@ -27,7 +27,7 @@ class ScoringController extends Controller
 
         $this->judging->lock($judging);
 
-        return $this->backToTab($competition, 'lembar', 'Lembar nilai dikunci.');
+        return $this->backToTab($competition, 'lembar', 'Lembar nilai dikunci.', ['kategori' => $judging->round->competition_category_id]);
     }
 
     public function reopen(Request $request, CompetitionListing $competition, CompetitionJudging $judging): RedirectResponse
@@ -38,7 +38,7 @@ class ScoringController extends Controller
 
         $this->judging->reopen($judging, $request->user(), $data['reason']);
 
-        return $this->backToTab($competition, 'lembar', 'Lembar nilai dibuka ulang. Juri bisa memperbaiki nilainya.');
+        return $this->backToTab($competition, 'lembar', 'Lembar nilai dibuka ulang. Juri bisa memperbaiki nilainya.', ['kategori' => $judging->round->competition_category_id]);
     }
 
     public function calculate(CompetitionListing $competition, CompetitionRound $round): RedirectResponse
@@ -48,7 +48,7 @@ class ScoringController extends Controller
 
         $count = $this->judging->calculateResults($round);
 
-        return $this->backToTab($competition, 'hasil', "Hasil {$round->category->name} · {$round->name} dihitung untuk {$count} peserta.");
+        return $this->backToTab($competition, 'hasil', "Hasil {$round->category->name} · {$round->name} dihitung untuk {$count} peserta.", ['kategori' => $round->competition_category_id]);
     }
 
     public function publish(CompetitionListing $competition, CompetitionRound $round): RedirectResponse
@@ -56,9 +56,9 @@ class ScoringController extends Controller
         $this->authorize('manage', $competition);
         $this->ensureBelongs($competition, $round->category->competition_listing_id);
 
-        $this->judging->publishResults($round);
+        $count = $this->judging->publishResults($round);
 
-        return $this->backToTab($competition, 'hasil', "Hasil {$round->category->name} · {$round->name} sudah tampil di halaman publik.");
+        return $this->backToTab($competition, 'hasil', "Peringkat {$round->category->name} · {$round->name} dihitung ulang untuk {$count} peserta dan sudah tampil di halaman publik.", ['kategori' => $round->competition_category_id]);
     }
 
     public function unpublish(CompetitionListing $competition, CompetitionRound $round): RedirectResponse
@@ -66,8 +66,9 @@ class ScoringController extends Controller
         $this->authorize('manage', $competition);
         $this->ensureBelongs($competition, $round->category->competition_listing_id);
 
-        $this->judging->unpublishResults($round);
+        $cleared = $this->judging->unpublishResults($round);
+        $note = $cleared === [] ? '' : ' Peserta '.implode(', ', $cleared).' dikosongkan karena dipilih dari peringkat ini; pilih ulang setelah hasilnya dipublikasikan lagi.';
 
-        return $this->backToTab($competition, 'hasil', "Hasil {$round->category->name} · {$round->name} ditarik dari halaman publik.");
+        return $this->backToTab($competition, 'hasil', "Hasil {$round->category->name} · {$round->name} ditarik dari halaman publik.{$note}", ['kategori' => $round->competition_category_id]);
     }
 }

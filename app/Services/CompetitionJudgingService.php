@@ -47,6 +47,103 @@ class CompetitionJudgingService
     }
 
     /**
+     * The first round of a category (lowest display order) is open to every team in it.
+     */
+    public function isFirstRound(CompetitionRound $round): bool
+    {
+        return $round->category->rounds->first()?->is($round) ?? true;
+    }
+
+    /**
+     * The round right before this one in the same category, or null for the first round.
+     */
+    public function previousRound(CompetitionRound $round): ?CompetitionRound
+    {
+        $rounds = $round->category->rounds->values();
+        $index = $rounds->search(fn (CompetitionRound $item) => $item->is($round));
+
+        return $index ? $rounds[$index - 1] : null;
+    }
+
+    /**
+     * The round right after this one in the same category, or null for the last round.
+     */
+    public function nextRound(CompetitionRound $round): ?CompetitionRound
+    {
+        $rounds = $round->category->rounds->values();
+        $index = $rounds->search(fn (CompetitionRound $item) => $item->is($round));
+
+        return $index === false ? null : $rounds->get($index + 1);
+    }
+
+    /**
+     * Why teams can no longer be added to this (later) round, or null when they can:
+     * - the next round has started judging: its teams came from this round's ranking, so it is frozen;
+     * - this round's results are public: judges could not score a new team anyway (unpublish first).
+     */
+    public function teamListClosedReason(CompetitionRound $round): ?string
+    {
+        $next = $this->nextRound($round);
+
+        if ($next && $next->judgings->isNotEmpty()) {
+            return "{$next->name} sudah mulai dinilai, jadi peserta {$round->name} tidak bisa ditambah lagi.";
+        }
+
+        if ($round->isPublished()) {
+            return "Hasil {$round->name} sudah dipublikasikan. Tarik dulu dari publik di tab Hasil kalau perlu menambah peserta, supaya juri bisa menilai peserta baru.";
+        }
+
+        return null;
+    }
+
+    /**
+     * [sent, expected] score sheets of the round: expected = teams × assigned judges,
+     * sent = submitted/locked sheets of those judges for those teams (drafts never count).
+     *
+     * @return array{0: int, 1: int}
+     */
+    public function sheetProgress(CompetitionRound $round): array
+    {
+        $judgeIds = $round->judges->pluck('id');
+        $teamIds = $this->entrants($round)->pluck('id');
+
+        $sent = $round->judgings
+            ->filter(fn (CompetitionJudging $sheet) => ! $sheet->isDraft()
+                && $judgeIds->contains($sheet->competition_judge_id)
+                && $teamIds->contains($sheet->competition_participant_id))
+            ->unique(fn (CompetitionJudging $sheet) => $sheet->competition_judge_id.'-'.$sheet->competition_participant_id)
+            ->count();
+
+        return [$sent, $judgeIds->count() * $teamIds->count()];
+    }
+
+    /**
+     * Judging of the round is finished: it has judges and teams, and every judge has sent
+     * a complete sheet for every team. Reopening a sheet makes it unfinished again.
+     */
+    public function isComplete(CompetitionRound $round): bool
+    {
+        [$sent, $expected] = $this->sheetProgress($round);
+
+        return $expected > 0 && $sent === $expected;
+    }
+
+    /**
+     * Teams taking part in the round: every team of the category in the first round,
+     * afterwards only the teams the admin moved on (competition_round_participants).
+     * Uses loaded relations when present, so the admin workspace stays at a few queries.
+     *
+     * @return Collection<int, CompetitionParticipant>
+     */
+    public function entrants(CompetitionRound $round): Collection
+    {
+        // The category filter is a safety net: a later round never lists a team of another category.
+        return $this->isFirstRound($round)
+            ? $round->category->participants
+            : $round->participants->where('competition_category_id', $round->competition_category_id)->values();
+    }
+
+    /**
      * The judge's sheet for this participant. With $create = false (just viewing)
      * an unsaved draft is returned, so opening a page never leaves empty sheets behind.
      */
@@ -54,6 +151,8 @@ class CompetitionJudgingService
     {
         abort_unless($this->isAssigned($round, $judge), 403);
         abort_unless($participant->competition_category_id === $round->competition_category_id, 404);
+        // A team that did not make this round cannot be scored in it.
+        abort_unless($this->entrants($round)->contains('id', $participant->id), 404);
 
         if (! $create) {
             return CompetitionJudging::firstOrNew([
@@ -79,7 +178,7 @@ class CompetitionJudgingService
      */
     public function saveDraft(CompetitionJudging $judging, array $input): void
     {
-        $this->assertReady($judging->round);
+        $this->assertOpen($judging->round);
         $this->assertDraft($judging);
         $criterionIds = $judging->round->criteria()->pluck('id');
 
@@ -108,7 +207,7 @@ class CompetitionJudgingService
 
     public function submit(CompetitionJudging $judging): void
     {
-        $this->assertReady($judging->round);
+        $this->assertOpen($judging->round);
         $this->assertDraft($judging);
 
         $missing = $judging->round->criteria()
@@ -163,8 +262,9 @@ class CompetitionJudgingService
     }
 
     /**
-     * Rebuilds the round's ranking. Per criterion the judges' scores are averaged
-     * (only sent/locked sheets count); participants missing any criterion are skipped.
+     * Rebuilds the round's ranking. A participant is ranked only once EVERY judge assigned
+     * to the round has sent (or locked) their sheet, so all ranked participants are averaged
+     * over the same judges. Per criterion the judges' scores are averaged; drafts never count.
      * weighted = Σ(average × weight / 100), with no weight counting as 100%.
      * Ties share a rank (1, 1, 3).
      *
@@ -173,10 +273,22 @@ class CompetitionJudgingService
     public function calculateResults(CompetitionRound $round): int
     {
         $criteria = $round->criteria()->get();
+        $judgeIds = $round->judges()->pluck('competition_judges.id');
+
+        // Teams of this round with a sent/locked sheet from every assigned judge.
+        $fullyJudged = $judgeIds->isEmpty() ? collect() : CompetitionJudging::query()
+            ->where('competition_round_id', $round->id)
+            ->whereIn('competition_participant_id', $this->entrants($round)->pluck('id'))
+            ->whereIn('competition_judge_id', $judgeIds)
+            ->whereIn('status', [ScoreSheetStatus::Submitted->value, ScoreSheetStatus::Locked->value])
+            ->groupBy('competition_participant_id')
+            ->havingRaw('count(distinct competition_judge_id) = ?', [$judgeIds->count()])
+            ->pluck('competition_participant_id');
 
         $averages = DB::table('competition_scores')
             ->join('competition_judgings', 'competition_judgings.id', '=', 'competition_scores.competition_judging_id')
             ->where('competition_judgings.competition_round_id', $round->id)
+            ->whereIn('competition_judgings.competition_participant_id', $fullyJudged)
             ->whereIn('competition_judgings.status', [ScoreSheetStatus::Submitted->value, ScoreSheetStatus::Locked->value])
             ->groupBy('competition_judgings.competition_participant_id', 'competition_scores.competition_criterion_id')
             ->select(
@@ -228,18 +340,60 @@ class CompetitionJudgingService
     /**
      * Recalculates first so the public page never shows a stale ranking.
      */
-    public function publishResults(CompetitionRound $round): void
+    /**
+     * @return int number of ranked participants
+     */
+    public function publishResults(CompetitionRound $round): int
     {
-        if ($this->calculateResults($round) === 0) {
-            throw ValidationException::withMessages(['results' => 'Belum ada peserta dengan nilai lengkap dari juri, jadi belum ada yang bisa dipublikasikan.']);
+        if (($count = $this->calculateResults($round)) === 0) {
+            throw ValidationException::withMessages(['results' => 'Belum ada peserta yang sudah dinilai semua juri, jadi belum ada yang bisa dipublikasikan.']);
         }
 
         $round->forceFill(['results_published_at' => now()])->save();
+
+        return $count;
     }
 
-    public function unpublishResults(CompetitionRound $round): void
+    /**
+     * Takes the round's results off the public page. Refused once the next round has started judging
+     * (its teams came from this official ranking, which must not change any more). Teams already
+     * picked for later rounds that have not started are cleared, since the ranking may now change.
+     *
+     * @return list<string> names of the later rounds whose team list was cleared
+     */
+    public function unpublishResults(CompetitionRound $round): array
     {
-        $round->forceFill(['results_published_at' => null])->save();
+        $next = $this->nextRound($round);
+
+        if ($next && $next->judgings()->exists()) {
+            throw ValidationException::withMessages([
+                'results' => "{$next->name} sudah mulai dinilai memakai peringkat {$round->name}, jadi hasil {$round->name} tidak bisa ditarik lagi.",
+            ]);
+        }
+
+        return DB::transaction(function () use ($round): array {
+            $round->forceFill(['results_published_at' => null])->save();
+
+            return $this->clearLaterRoundTeams($round);
+        });
+    }
+
+    /**
+     * Empties the team lists of the rounds after this one that have not started judging
+     * (they were picked from this round's ranking, which is changing). No sheet is touched.
+     *
+     * @return list<string> names of the rounds that were cleared
+     */
+    public function clearLaterRoundTeams(CompetitionRound $round): array
+    {
+        $later = $round->category->rounds()->get()
+            ->filter(fn (CompetitionRound $item) => $item->display_order > $round->display_order
+                || ($item->display_order === $round->display_order && $item->id > $round->id))
+            ->filter(fn (CompetitionRound $item) => $item->participants()->exists() && ! $item->judgings()->exists());
+
+        $later->each(fn (CompetitionRound $item) => $item->participants()->detach());
+
+        return $later->pluck('name')->values()->all();
     }
 
     public function assertReady(CompetitionRound $round): void
@@ -247,6 +401,21 @@ class CompetitionJudgingService
         if (! $this->isReadyForJudging($round)) {
             throw ValidationException::withMessages([
                 'submit' => 'Babak ini belum siap dinilai: total bobot kriteria harus tepat 100%. Hubungi panitia.',
+            ]);
+        }
+    }
+
+    /**
+     * Judges can score only while the round is ready and its results are not public yet.
+     * Otherwise a late sheet would change the public per-judge scores but not the published ranking.
+     */
+    public function assertOpen(CompetitionRound $round): void
+    {
+        $this->assertReady($round);
+
+        if ($round->isPublished()) {
+            throw ValidationException::withMessages([
+                'submit' => 'Hasil babak ini sudah diumumkan, jadi penilaian sudah ditutup. Hubungi panitia.',
             ]);
         }
     }

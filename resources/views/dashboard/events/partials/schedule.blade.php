@@ -99,7 +99,7 @@
                                     <button type="submit" class="cursor-pointer rounded p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Turunkan urutan">↓</button>
                                 </form>
                                 <form method="POST" action="{{ route('dashboard.events.schedule.destroy', [$event, $slot]) }}"
-                                      onsubmit="return confirm('Hapus slot jadwal ini?');">
+                                      data-confirm-title="Hapus slot jadwal?" data-confirm="Slot jadwal yang sudah dihapus tidak bisa dikembalikan." data-confirm-button="Ya, hapus">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="cursor-pointer rounded p-2 text-red-500 hover:bg-red-50" aria-label="Hapus">✕</button>
                                 </form>

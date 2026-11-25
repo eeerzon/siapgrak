@@ -82,7 +82,7 @@
     </form>
 
     @if ($isDraft)
-        <form id="submit-form" method="POST" action="{{ route('judge.rounds.entries.submit', [$round, $entry]) }}">
+        <form id="submit-form" method="POST" action="{{ route('judge.rounds.entries.submit', [$round, $entry]) }}" data-confirm-title="Kirim nilai final?" data-confirm="Setelah dikirim, nilai tidak bisa diubah kecuali panitia membuka ulang." data-confirm-button="Ya, kirim" data-confirm-icon="question">
             @csrf
         </form>
 
@@ -116,9 +116,7 @@
                         alert('Ada nilai yang belum disimpan. Tekan "Simpan Draft" dulu, lalu kirim.');
                         return;
                     }
-                    if (!confirm('Kirim nilai final? Setelah dikirim, nilai tidak bisa diubah kecuali panitia membuka ulang.')) {
-                        event.preventDefault();
-                    }
+                    // Confirmation itself: data-confirm on #submit-form (resources/js/confirm-dialog.js).
                 });
             })();
         </script>

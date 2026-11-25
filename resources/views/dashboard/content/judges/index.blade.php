@@ -26,7 +26,7 @@
                                     <p class="text-sm text-slate-500">{{ $judge->bio ?: 'Belum ada keterangan.' }}</p>
                                     <p class="mt-1 text-xs text-slate-400">Ditugaskan di {{ $judge->rounds_count }} babak</p>
                                 </div>
-                                <div class="text-right">
+                                <div class="sm:text-right">
                                     <p class="text-xs text-slate-500">Kode akses</p>
                                     <p class="font-mono text-lg font-bold tracking-[0.2em] text-navy-900">{{ $judge->access_code }}</p>
                                     @if ($judge->status->value !== 'active')
@@ -52,7 +52,7 @@
                                         <button type="submit" form="regenerate-{{ $judge->id }}" class="cursor-pointer text-xs font-medium text-red-600 hover:underline">Ganti kode akses</button>
                                     </div>
                                 </form>
-                                <form id="regenerate-{{ $judge->id }}" method="POST" action="{{ route('dashboard.content.judges.access-code', $judge) }}" onsubmit="return confirm('Ganti kode akses {{ $judge->name }}? Kode lama langsung tidak berlaku.')">
+                                <form id="regenerate-{{ $judge->id }}" method="POST" action="{{ route('dashboard.content.judges.access-code', $judge) }}" data-confirm-title="{{ 'Ganti kode akses '.$judge->name.'?' }}" data-confirm="Kode lama langsung tidak berlaku, dan juri yang sedang masuk dengan kode lama akan keluar." data-confirm-button="Ya, ganti kode" data-confirm-icon="warning">
                                     @csrf @method('PATCH')
                                 </form>
                             </details>

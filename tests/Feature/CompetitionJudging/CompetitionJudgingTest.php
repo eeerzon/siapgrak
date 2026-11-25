@@ -3,6 +3,7 @@
 namespace Tests\Feature\CompetitionJudging;
 
 use App\Enums\ScoreSheetStatus;
+use App\Http\Middleware\EnsureCompetitionJudgeSession;
 use App\Models\CompetitionCategory;
 use App\Models\CompetitionJudge;
 use App\Models\CompetitionJudging;
@@ -49,7 +50,12 @@ class CompetitionJudgingTest extends TestCase
 
     private function judgeSession(?CompetitionJudge $judge = null): static
     {
-        return $this->withSession(['competition_judge_id' => ($judge ?? $this->judge)->id]);
+        $judge ??= $this->judge;
+
+        return $this->withSession([
+            EnsureCompetitionJudgeSession::SESSION_KEY => $judge->id,
+            EnsureCompetitionJudgeSession::CODE_KEY => EnsureCompetitionJudgeSession::fingerprint($judge),
+        ]);
     }
 
     /**
@@ -216,17 +222,23 @@ class CompetitionJudgingTest extends TestCase
     {
         $second = CompetitionJudge::create(['id_user' => $this->admin->id_user, 'name' => 'Juri Dua', 'status' => 'active']);
         $this->round->judges()->attach($second);
-        [$a, $b, $c, $d, $e] = collect(['A', 'B', 'C', 'D', 'E'])->map(fn ($n) => $this->participant($n))->all();
+        [$a, $b, $c, $d, $e, $f] = collect(['A', 'B', 'C', 'D', 'E', 'F'])->map(fn ($n) => $this->participant($n))->all();
 
         // A: PBB avg 90, Formasi avg 80 → 90×0.6 + 80×0.4 = 86
         $this->sentSheet($a, $this->judge, [100, 70]);
         $this->sentSheet($a, $second, [80, 90], ScoreSheetStatus::Locked);
         // B and C tie at 80
-        $this->sentSheet($b, $this->judge, [80, 80]);
-        $this->sentSheet($c, $this->judge, [80, 80]);
-        // D: missing Formasi → skipped. E: only a draft → skipped.
+        foreach ([$b, $c] as $tied) {
+            $this->sentSheet($tied, $this->judge, [80, 80]);
+            $this->sentSheet($tied, $second, [80, 80]);
+        }
+        // D: missing Formasi → skipped. E: second judge still in draft → skipped.
         $this->sentSheet($d, $this->judge, [99]);
-        $this->sentSheet($e, $this->judge, [100, 100], ScoreSheetStatus::Draft);
+        $this->sentSheet($d, $second, [99]);
+        $this->sentSheet($e, $this->judge, [100, 100]);
+        $this->sentSheet($e, $second, [100, 100], ScoreSheetStatus::Draft);
+        // F: complete sheet from one judge, the other has not judged yet → skipped, never ranked on one judge alone.
+        $this->sentSheet($f, $this->judge, [100, 100]);
 
         $this->assertSame(3, app(CompetitionJudgingService::class)->calculateResults($this->round));
 
@@ -243,6 +255,8 @@ class CompetitionJudgingTest extends TestCase
         $round->criteria()->create(['name' => 'PBB', 'weight' => 60, 'minimum_score' => 0, 'maximum_score' => 100]);
         $varisi = $round->criteria()->create(['name' => 'Variasi', 'weight' => 30, 'minimum_score' => 0, 'maximum_score' => 100]);
         $round->judges()->attach($this->judge);
+        // Second round of the category: the team has to be moved on to it.
+        $round->participants()->attach($participant);
 
         $this->judgeSession()->get(route('juri.round', $round))->assertSee('Babak ini belum bisa dinilai');
         $this->judgeSession()->get(route('juri.score.show', [$round, $participant]))->assertDontSee('Kirim Skor Final');
@@ -406,6 +420,23 @@ class CompetitionJudgingTest extends TestCase
             ->assertSee('Juri Satu (belum menilai)');
     }
 
+    public function test_participant_waits_for_every_assigned_judge_before_ranking(): void
+    {
+        $second = CompetitionJudge::create(['id_user' => $this->admin->id_user, 'name' => 'Juri Dua', 'status' => 'active']);
+        $this->round->judges()->attach($second);
+        $participant = $this->participant('01');
+        $this->sentSheet($participant, $this->judge, [90, 90]);
+
+        $this->assertSame(0, app(CompetitionJudgingService::class)->calculateResults($this->round));
+        $this->actingAs($this->admin)->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'hasil']))
+            ->assertSee('Baru 1 dari 2 juri yang mengirim nilai.')
+            ->assertSee('Juri Dua (belum menilai)');
+
+        $this->sentSheet($participant, $second, [70, 70]);
+        $this->assertSame(1, app(CompetitionJudgingService::class)->calculateResults($this->round));
+        $this->assertEquals(80.0, (float) $this->round->results()->first()->weighted_score);
+    }
+
     public function test_sheet_tab_shows_round_readiness_and_draft_listings_cannot_copy_the_link(): void
     {
         $participant = $this->participant('A1');
@@ -429,5 +460,406 @@ class CompetitionJudgingTest extends TestCase
         ])->assertSessionHasErrors('competition_number');
 
         $this->assertSame(0, $this->listing->participants()->count());
+    }
+
+    public function test_new_access_code_ends_sessions_made_with_the_old_one(): void
+    {
+        $this->judgeSession()->get(route('juri.dashboard'))->assertOk();
+
+        $this->actingAs($this->admin)->patch(route('dashboard.content.judges.access-code', $this->judge))->assertSessionHasNoErrors();
+
+        $this->get(route('juri.dashboard'))->assertRedirect(route('juri.access.create'));
+    }
+
+    public function test_judges_cannot_score_after_the_round_is_published(): void
+    {
+        $sent = $this->participant('01');
+        $late = $this->participant('02');
+        $this->sentSheet($sent, $this->judge, [80, 70]);
+        $this->round->forceFill(['results_published_at' => now()])->save();
+        $criteria = $this->round->criteria;
+
+        $this->judgeSession()->post(route('juri.score.save', [$this->round, $late]), [
+            'scores' => [$criteria[0]->id => ['score' => 90], $criteria[1]->id => ['score' => 90]],
+            'kirim' => 1,
+        ])->assertSessionHasErrors('submit');
+
+        $this->assertFalse($this->round->judgings()->where('competition_participant_id', $late->id)->exists());
+    }
+
+    public function test_confirm_dialogs_escape_names_with_quotes(): void
+    {
+        $this->listing->participants()->create(['competition_category_id' => $this->category->id, 'name' => "Ma'arif');alert(1);//", 'competition_number' => '07']);
+
+        $this->actingAs($this->admin)->get(route('dashboard.content.competitions.judging.show', $this->listing))
+            ->assertOk()
+            ->assertSee('data-confirm-title="Hapus Ma&#039;arif&#039;);alert(1);//?"', false)
+            ->assertDontSee('onsubmit="return confirm(', false);
+    }
+
+    public function test_publish_confirm_warns_about_unsent_sheets_and_the_toast_reports_the_count(): void
+    {
+        $second = CompetitionJudge::create(['id_user' => $this->admin->id_user, 'name' => 'Juri Dua', 'status' => 'active']);
+        $this->round->judges()->attach($second);
+        $complete = $this->participant('01');
+        $pending = $this->participant('02');
+        $this->sentSheet($complete, $this->judge, [80, 70]);
+        $this->sentSheet($complete, $second, [90, 60]);
+        $this->sentSheet($pending, $this->judge, [70, 70], ScoreSheetStatus::Draft);
+
+        $this->actingAs($this->admin)->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'hasil']))
+            ->assertOk()
+            ->assertSee('2 lembar nilai belum dikirim juri (1 masih draft)', false)
+            ->assertSee('1 peserta belum dinilai semua juri', false)
+            ->assertSee('data-confirm-button="Tetap publikasikan"', false)
+            ->assertSee('data-confirm-icon="warning"', false);
+
+        $this->post(route('dashboard.content.competitions.judging.results.publish', [$this->listing, $this->round]))
+            ->assertSessionHas('success', 'Peringkat SMA · Final dihitung ulang untuk 1 peserta dan sudah tampil di halaman publik.');
+    }
+
+    public function test_each_category_has_its_own_public_results_link(): void
+    {
+        $this->listing->update(['status' => 'published']);
+        $smp = $this->listing->categories()->create(['name' => 'SMP']);
+        CompetitionRound::create(['competition_category_id' => $smp->id, 'name' => 'Penyisihan SMP']);
+        $other = CompetitionListing::create(['title' => 'Lomba Lain', 'start_date' => '2030-01-01', 'status' => 'published', 'id_user' => $this->admin->id_user]);
+        $foreign = $other->categories()->create(['name' => 'Asing']);
+
+        $this->get(route('site.competitions.results', $this->listing->slug))
+            ->assertOk()->assertSee('Final')->assertSee('Penyisihan SMP')->assertSee('Semua kategori');
+
+        $this->get(route('site.competitions.results.category', [$this->listing->slug, $smp->id]))
+            ->assertOk()->assertSee('Hasil Penilaian SMP')->assertSee('Penyisihan SMP')->assertDontSee('<h2 class="mt-4 text-2xl font-bold tracking-[-0.02em] md:text-[32px]">Final</h2>', false);
+
+        // A category of another listing, or one without rounds, is not a valid link.
+        $this->get(route('site.competitions.results.category', [$this->listing->slug, $foreign->id]))->assertNotFound();
+        $empty = $this->listing->categories()->create(['name' => 'Tanpa Babak']);
+        $this->get(route('site.competitions.results.category', [$this->listing->slug, $empty->id]))->assertNotFound();
+
+        $participant = $this->participant('01');
+        $this->sentSheet($participant, $this->judge, [80, 70]);
+        $this->actingAs($this->admin)->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'hasil']))
+            ->assertSee(route('site.competitions.results', $this->listing->slug), false)
+            ->assertSee(route('site.competitions.results.category', [$this->listing->slug, $smp->id]), false)
+            ->assertSee(route('site.competitions.results.category', [$this->listing->slug, $this->category->id]), false);
+    }
+
+    public function test_admin_tabs_show_one_category_at_a_time_and_keep_it_across_tabs(): void
+    {
+        $smp = $this->listing->categories()->create(['name' => 'SMP', 'display_order' => 2]);
+        $this->participant('SMA-01');
+        $this->listing->participants()->create(['competition_category_id' => $smp->id, 'name' => 'Tim SMP Satu', 'competition_number' => 'SMP-01']);
+        $this->actingAs($this->admin);
+
+        // Default: first category.
+        $this->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'peserta']))
+            ->assertSee('Tim SMA-01')->assertDontSee('Tim SMP Satu');
+
+        $this->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'peserta', 'kategori' => $smp->id]))
+            ->assertSee('Tim SMP Satu')->assertDontSee('Tim SMA-01')
+            ->assertSee(e(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'hasil', 'kategori' => $smp->id])), false)
+            ->assertSee('<input type="hidden" name="competition_category_id" value="'.$smp->id.'">', false);
+
+        $this->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian', 'kategori' => $smp->id]))
+            ->assertSee('Belum ada babak di SMP.')->assertDontSee('<h2 class="font-semibold text-navy-900">Final</h2>', false);
+
+        $this->post(route('dashboard.content.competitions.judging.rounds.store', $this->listing), ['competition_category_id' => $smp->id, 'name' => 'Penyisihan'])
+            ->assertRedirect(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian', 'kategori' => $smp->id]));
+    }
+
+    public function test_public_results_show_one_round_per_category_defaulting_to_the_latest_published(): void
+    {
+        $this->listing->update(['status' => 'published']);
+        $this->round->update(['name' => 'Penyisihan', 'display_order' => 1]);
+        $final = CompetitionRound::create(['competition_category_id' => $this->category->id, 'name' => 'Final Besar', 'display_order' => 2]);
+        $participant = $this->participant('01');
+        $this->sentSheet($participant, $this->judge, [80, 70]);
+        app(CompetitionJudgingService::class)->publishResults($this->round);
+        $url = fn (?CompetitionRound $round = null) => $round
+            ? route('site.competitions.results.round', [$this->listing->slug, $this->category->id, $round->id])
+            : route('site.competitions.results.category', [$this->listing->slug, $this->category->id]);
+
+        // Final is not published yet, so the latest published round (Penyisihan) opens by default.
+        $this->get($url())->assertOk()->assertSee('Tim 01')->assertDontSee('Final Besar masih berlangsung')
+            ->assertSee($url($final), false)->assertSee('· berlangsung', false);
+        $this->get($url($final))->assertOk()->assertSee('Final Besar masih berlangsung')->assertDontSee('Tim 01');
+
+        // A round of another category is not a valid link.
+        $smp = $this->listing->categories()->create(['name' => 'SMP']);
+        $smpRound = CompetitionRound::create(['competition_category_id' => $smp->id, 'name' => 'Final SMP']);
+        $this->get(route('site.competitions.results.round', [$this->listing->slug, $this->category->id, $smpRound->id]))->assertNotFound();
+    }
+
+    public function test_later_rounds_only_have_the_teams_moved_on_to_them(): void
+    {
+        [$a, $b, $c] = collect(['A', 'B', 'C'])->map(fn ($n) => $this->participant($n))->all();
+        $final = CompetitionRound::create(['competition_category_id' => $this->category->id, 'name' => 'Final Besar', 'display_order' => 2]);
+        $final->criteria()->create(['name' => 'PBB', 'weight' => 100, 'minimum_score' => 0, 'maximum_score' => 100]);
+        $final->judges()->attach($this->judge);
+        $service = app(CompetitionJudgingService::class);
+
+        // First round: the whole category. Later round: nobody until the admin moves teams on.
+        $this->assertCount(3, $service->entrants($this->round->fresh()));
+        $this->assertCount(0, $service->entrants($final->fresh()));
+        $this->judgeSession()->get(route('juri.score.show', [$final, $a]))->assertNotFound();
+
+        // "Ambil 2 teratas" needs a ranking first.
+        $this->actingAs($this->admin)->post(route('dashboard.content.competitions.judging.round-participants.top', [$this->listing, $final]), ['top' => 2])
+            ->assertSessionHasErrors('round_participants');
+
+        $this->sentSheet($a, $this->judge, [90, 90]);
+        $this->sentSheet($b, $this->judge, [80, 80]);
+        $this->sentSheet($c, $this->judge, [80, 80]);
+        $service->publishResults($this->round);
+
+        // B and C tie at rank 2, so asking for the top 2 moves on all three.
+        $this->post(route('dashboard.content.competitions.judging.round-participants.top', [$this->listing, $final]), ['top' => 2])
+            ->assertRedirect(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian', 'kategori' => $this->category->id]));
+        $this->assertEqualsCanonicalizing([$a->id, $b->id, $c->id], $final->participants()->pluck('competition_participants.id')->all());
+
+        // Taking a team out works until it has a sheet in that round.
+        $this->delete(route('dashboard.content.competitions.judging.round-participants.destroy', [$this->listing, $final, $b]))->assertSessionHasNoErrors();
+        $this->judgeSession()->post(route('juri.score.save', [$final, $a]), ['scores' => [$final->criteria()->first()->id => ['score' => 88]], 'kirim' => 1])->assertSessionHasNoErrors();
+        $this->actingAs($this->admin)->delete(route('dashboard.content.competitions.judging.round-participants.destroy', [$this->listing, $final, $a]))
+            ->assertSessionHasErrors('round_participants');
+
+        // Manual add only accepts teams of the same category; the first round has no team list to edit.
+        $smp = $this->listing->categories()->create(['name' => 'SMP']);
+        $outsider = $this->listing->participants()->create(['competition_category_id' => $smp->id, 'name' => 'Tim Luar', 'competition_number' => 'X1']);
+        $this->post(route('dashboard.content.competitions.judging.round-participants.store', [$this->listing, $final]), ['participant_ids' => [$outsider->id]])
+            ->assertSessionHasErrors('participant_ids.0');
+        $this->post(route('dashboard.content.competitions.judging.round-participants.store', [$this->listing, $final]), ['participant_ids' => [$c->id]])
+            ->assertSessionHasNoErrors();
+        $this->post(route('dashboard.content.competitions.judging.round-participants.store', [$this->listing, $this->round]), ['participant_ids' => [$a->id]])
+            ->assertNotFound();
+
+        // Ranking and the judge panel only count the round's teams.
+        $this->assertSame(1, $service->calculateResults($final->fresh()));
+        $this->judgeSession()->get(route('juri.round', $final))->assertSee('Tim A')->assertSee('Tim C')->assertDontSee('Tim B');
+        $this->actingAs($this->admin)->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian']))
+            ->assertSee('Peserta babak ini (2)')->assertSee('Ambil peserta teratas dari Final');
+    }
+
+    public function test_finished_rounds_start_collapsed_in_the_sheets_and_results_tabs(): void
+    {
+        $participant = $this->participant('01');
+        $this->sentSheet($participant, $this->judge, [80, 70]);
+        $this->actingAs($this->admin);
+        $page = fn (string $tab) => $this->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => $tab]));
+
+        // Still running: shown in full, no toggle.
+        $page('lembar')->assertSee('x-data="{ open: true }"', false)->assertDontSee('Tampilkan detail');
+        $page('hasil')->assertSee('x-data="{ open: true }"', false)->assertDontSee('Tampilkan detail');
+
+        app(CompetitionJudgingService::class)->publishResults($this->round);
+
+        $page('lembar')->assertSee('x-data="{ open: false }"', false)->assertSee('Tampilkan detail')
+            ->assertSee('1/1</span> lembar terkirim', false);
+        $page('hasil')->assertSee('x-data="{ open: false }"', false)->assertSee('Tampilkan detail')
+            ->assertSee('1 peserta diperingkat');
+        // The rounds tab is never collapsed.
+        $page('penjurian')->assertDontSee('Tampilkan detail')->assertSee('Selesai · hasil diumumkan');
+    }
+
+    public function test_round_team_list_rejects_foreign_teams_and_follows_category_moves(): void
+    {
+        $final = CompetitionRound::create(['competition_category_id' => $this->category->id, 'name' => 'Final Besar', 'display_order' => 2]);
+        $team = $this->participant('01');
+        $final->participants()->attach($team);
+        $this->actingAs($this->admin);
+
+        // A team of another admin's listing: 404, and its name is never echoed back.
+        $other = User::factory()->create(['is_platform_admin' => true]);
+        $foreignListing = CompetitionListing::create(['title' => 'Lain', 'start_date' => '2030-01-01', 'status' => 'draft', 'id_user' => $other->id_user]);
+        $foreignCategory = $foreignListing->categories()->create(['name' => 'X']);
+        $secret = $foreignListing->participants()->create(['competition_category_id' => $foreignCategory->id, 'name' => 'Nama Rahasia', 'competition_number' => 'Z9']);
+        $this->delete(route('dashboard.content.competitions.judging.round-participants.destroy', [$this->listing, $final, $secret]))->assertNotFound();
+        $this->assertNull(session('success'));
+
+        // Moving a not-yet-judged team to another category takes it out of the old category's later rounds.
+        $smp = $this->listing->categories()->create(['name' => 'SMP']);
+        $this->put(route('dashboard.content.competitions.judging.participants.update', [$this->listing, $team]), [
+            'competition_category_id' => $smp->id, 'name' => 'Tim 01', 'competition_number' => '01',
+        ])->assertSessionHasNoErrors();
+        $this->assertFalse($final->participants()->whereKey($team->id)->exists());
+        $this->assertCount(0, app(CompetitionJudgingService::class)->entrants($final->fresh()));
+    }
+
+    public function test_saving_scores_returns_the_judge_to_the_team_list(): void
+    {
+        $participant = $this->participant('01');
+        [$pbb, $formasi] = $this->round->criteria->all();
+        $save = fn (array $data) => $this->judgeSession()->from(route('juri.score.show', [$this->round, $participant]))
+            ->post(route('juri.score.save', [$this->round, $participant]), $data);
+
+        // Invalid input stays on the score form.
+        $save(['scores' => [$pbb->id => ['score' => 500]]])->assertRedirect(route('juri.score.show', [$this->round, $participant]));
+
+        $save(['scores' => [$pbb->id => ['score' => 80]]])
+            ->assertRedirect(route('juri.round', $this->round))->assertSessionHas('success', 'Draft nilai Tim 01 tersimpan.');
+        $save(['scores' => [$pbb->id => ['score' => 80], $formasi->id => ['score' => 75]], 'kirim' => 1])
+            ->assertRedirect(route('juri.round', $this->round))->assertSessionHas('success', 'Nilai Tim 01 terkirim ke panitia.');
+    }
+
+    public function test_manual_pick_list_follows_the_previous_round_ranking(): void
+    {
+        [$a, $b, $c] = collect(['A', 'B', 'C'])->map(fn ($n) => $this->participant($n))->all();
+        $this->sentSheet($a, $this->judge, [70, 70]);
+        $this->sentSheet($b, $this->judge, [90, 90]);
+        $this->sentSheet($c, $this->judge, [80, 80]);
+        app(CompetitionJudgingService::class)->publishResults($this->round);
+        CompetitionRound::create(['competition_category_id' => $this->category->id, 'name' => 'Babak II', 'display_order' => 2]);
+
+        // Best first by the previous round's ranking, with the rank and score shown.
+        $this->actingAs($this->admin)->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian']))
+            ->assertSee('Pilih manual (3 peserta Final lainnya, urut peringkat)')
+            ->assertSeeInOrder(['Tim B', '>90</span>', 'Tim C', '>80</span>', 'Tim A', '>70</span>'], false)
+            ->assertSee('title="Peringkat 1 di Final"', false);
+
+        // Chips of teams already in the round follow the same order, with the rank but no score.
+        CompetitionRound::where('name', 'Babak II')->first()->participants()->attach([$a->id, $b->id]);
+        $this->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian']))
+            ->assertSeeInOrder(['Peserta babak ini (2)', 'title="Peringkat 1 di Final">1</span>', 'Tim B', 'title="Peringkat 3 di Final">3</span>', 'Tim A', 'Pilih manual'], false);
+    }
+
+    public function test_a_round_is_complete_when_every_judge_sent_every_team_and_gates_the_next_round(): void
+    {
+        $second = CompetitionJudge::create(['id_user' => $this->admin->id_user, 'name' => 'Juri Dua', 'status' => 'active']);
+        $spare = CompetitionJudge::create(['id_user' => $this->admin->id_user, 'name' => 'Juri Cadangan', 'status' => 'active']);
+        $this->round->judges()->attach($second);
+        [$a, $b] = collect(['A', 'B'])->map(fn ($n) => $this->participant($n))->all();
+        $next = CompetitionRound::create(['competition_category_id' => $this->category->id, 'name' => 'Babak II', 'display_order' => 2]);
+        $service = app(CompetitionJudgingService::class);
+        $this->actingAs($this->admin);
+        $page = fn () => $this->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian']));
+
+        // 3 of 4 sheets sent, the 4th still a draft: not complete.
+        $this->sentSheet($a, $this->judge, [80, 80]);
+        $this->sentSheet($a, $second, [80, 80]);
+        $this->sentSheet($b, $this->judge, [70, 70]);
+        $draft = $this->sentSheet($b, $second, [70, 70], ScoreSheetStatus::Draft);
+        $this->assertFalse($service->isComplete($this->round->fresh()));
+        $page()->assertSee('Final masih berlangsung')->assertSee('Sekarang 3 dari 4 lembar terkirim.')
+            ->assertDontSee('Pilih manual')->assertSee('Tugaskan juri');
+        $this->post(route('dashboard.content.competitions.judging.round-participants.store', [$this->listing, $next]), ['participant_ids' => [$a->id]])
+            ->assertSessionHasErrors('round_participants');
+        $service->calculateResults($this->round);
+        $this->post(route('dashboard.content.competitions.judging.round-participants.top', [$this->listing, $next]), ['top' => 1])
+            ->assertSessionHasErrors('round_participants');
+
+        // Last sheet sent: complete. No new judges; the next round opens its team pick.
+        $draft->forceFill(['status' => ScoreSheetStatus::Submitted])->save();
+        $this->assertTrue($service->isComplete($this->round->fresh()));
+        $page()->assertSee('Selesai dinilai · 4/4 lembar terkirim')
+            ->assertSee('Semua juri sudah selesai menilai babak ini')
+            ->assertSee('Hasil Final belum dipublikasikan')->assertDontSee('Pilih manual');
+        $this->post(route('dashboard.content.competitions.judging.round-participants.store', [$this->listing, $next]), ['participant_ids' => [$a->id]])
+            ->assertSessionHasErrors('round_participants');
+
+        // Finished and published: the next round can pick its teams.
+        $service->publishResults($this->round->fresh());
+        $page()->assertDontSee('lembar terkirim.</p>', false)->assertDontSee('belum dipublikasikan</p>', false)->assertSee('Pilih manual');
+        $this->post(route('dashboard.content.competitions.judging.judges.assign', [$this->listing, $this->round]), ['competition_judge_id' => $spare->id])
+            ->assertSessionHasErrors('judge');
+        $this->post(route('dashboard.content.competitions.judging.round-participants.store', [$this->listing, $next]), ['participant_ids' => [$a->id]])
+            ->assertSessionHasNoErrors();
+    }
+
+    public function test_adding_teams_to_a_later_round_follows_the_closing_rules_and_resets_the_next_round(): void
+    {
+        $teams = collect(['A', 'B', 'C', 'D'])->map(fn ($n) => $this->participant($n));
+        foreach ($teams as $i => $team) {
+            $this->sentSheet($team, $this->judge, [90 - $i * 5, 90 - $i * 5]);
+        }
+        $service = app(CompetitionJudgingService::class);
+        $service->publishResults($this->round);
+        $two = CompetitionRound::create(['competition_category_id' => $this->category->id, 'name' => 'Babak II', 'display_order' => 2]);
+        $two->criteria()->create(['name' => 'PBB', 'weight' => 100, 'minimum_score' => 0, 'maximum_score' => 100]);
+        $two->judges()->attach($this->judge);
+        $three = CompetitionRound::create(['competition_category_id' => $this->category->id, 'name' => 'Babak III', 'display_order' => 3]);
+        $three->judges()->attach($this->judge);
+        [$a, $b, $c, $d] = $teams->all();
+        $this->actingAs($this->admin);
+        $add = fn (CompetitionRound $round, array $ids) => $this->post(route('dashboard.content.competitions.judging.round-participants.store', [$this->listing, $round]), ['participant_ids' => $ids]);
+        $penjurian = fn () => $this->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian']));
+
+        // Babak II: top 2 of Final, all judged; Babak III picks from Babak II's teams only.
+        $add($two, [$a->id, $b->id])->assertSessionHasNoErrors();
+        foreach ([$a, $b] as $i => $team) {
+            $this->judgeSession()->post(route('juri.score.save', [$two, $team]), ['scores' => [$two->criteria()->first()->id => ['score' => 80 - $i]], 'kirim' => 1]);
+        }
+        $service->publishResults($two->fresh());
+        $penjurian()->assertSee('Pilih manual (2 peserta Babak II lainnya, urut peringkat)');
+        $add($three, [$c->id])->assertSessionHasErrors('participant_ids.0');
+        $add($three, [$a->id])->assertSessionHasNoErrors();
+
+        // Babak III has a team but no sheet yet: taking Babak II off the public page clears Babak III's teams
+        // (they came from that ranking), then adding to Babak II is allowed.
+        $this->delete(route('dashboard.content.competitions.judging.results.unpublish', [$this->listing, $two]))
+            ->assertSessionHas('success', fn ($message) => str_contains($message, 'Peserta Babak III dikosongkan'));
+        $this->assertSame(0, $three->participants()->count());
+        $add($two, [$c->id])->assertSessionHasNoErrors();
+        $penjurian()->assertSee('Babak II masih berlangsung');
+
+        // Babak II published: closed until it is taken off the public page.
+        $this->judgeSession()->post(route('juri.score.save', [$two, $c]), ['scores' => [$two->criteria()->first()->id => ['score' => 70]], 'kirim' => 1]);
+        $service->publishResults($two->fresh());
+        $add($two, [$d->id])->assertSessionHasErrors('round_participants');
+        $penjurian()->assertSee('Tarik dulu dari publik di tab Hasil');
+
+        // Babak III started: Babak II's team list is frozen for good.
+        $service->unpublishResults($two->fresh());
+        $three->participants()->attach($a);
+        $three->criteria()->create(['name' => 'PBB', 'weight' => 100, 'minimum_score' => 0, 'maximum_score' => 100]);
+        $this->judgeSession()->post(route('juri.score.save', [$three, $a]), ['scores' => [$three->criteria()->first()->id => ['score' => 88]]]);
+        $this->actingAs($this->admin);
+        $add($two, [$d->id])->assertSessionHasErrors('round_participants');
+        $penjurian()->assertSee('Babak III sudah mulai dinilai, jadi peserta Babak II tidak bisa ditambah lagi.');
+
+        // Babak II published again: it cannot be taken off the public page any more (Babak III is judged from it),
+        // and no new judge can be assigned to a public round.
+        $this->judgeSession()->post(route('juri.score.save', [$two, $d]), []);
+        $service->publishResults($two->fresh());
+        $this->actingAs($this->admin);
+        $this->delete(route('dashboard.content.competitions.judging.results.unpublish', [$this->listing, $two]))->assertSessionHasErrors('results');
+        $this->assertTrue($two->fresh()->isPublished());
+        $this->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'hasil']))
+            ->assertSee('title="Babak III sudah mulai dinilai memakai peringkat ini, jadi hasilnya tidak bisa ditarik lagi."', false);
+        $spare = CompetitionJudge::create(['id_user' => $this->admin->id_user, 'name' => 'Juri Cadangan', 'status' => 'active']);
+        $this->post(route('dashboard.content.competitions.judging.judges.assign', [$this->listing, $two]), ['competition_judge_id' => $spare->id])
+            ->assertSessionHasErrors('judge');
+    }
+
+    public function test_publishing_too_early_tells_the_admin_how_to_let_judges_finish(): void
+    {
+        $second = CompetitionJudge::create(['id_user' => $this->admin->id_user, 'name' => 'Juri Dua', 'status' => 'active']);
+        $this->round->judges()->attach($second);
+        $a = $this->participant('A');
+        $b = $this->participant('B');
+        $this->sentSheet($a, $this->judge, [80, 80]);
+        $this->sentSheet($a, $second, [80, 80]);
+        $this->sentSheet($b, $this->judge, [70, 70]);
+        app(CompetitionJudgingService::class)->publishResults($this->round);
+        $next = CompetitionRound::create(['competition_category_id' => $this->category->id, 'name' => 'Babak II', 'display_order' => 2]);
+
+        $this->actingAs($this->admin)->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'penjurian']))
+            ->assertSee('Hasil Final dipublikasikan sebelum semua juri selesai (3 dari 4 lembar terkirim)');
+        $this->post(route('dashboard.content.competitions.judging.round-participants.store', [$this->listing, $next]), ['participant_ids' => [$a->id]])
+            ->assertSessionHasErrors(['round_participants' => 'Hasil Final dipublikasikan sebelum semua juri selesai menilai. Tarik dulu hasilnya di tab Hasil supaya juri bisa menyelesaikan penilaian, lalu publikasikan lagi.']);
+    }
+
+    public function test_lock_feature_is_hidden_and_locked_sheets_read_as_sent(): void
+    {
+        $sent = $this->participant('01');
+        $locked = $this->participant('02');
+        $this->sentSheet($sent, $this->judge, [80, 70]);
+        $this->sentSheet($locked, $this->judge, [80, 70], ScoreSheetStatus::Locked);
+
+        $this->actingAs($this->admin)->get(route('dashboard.content.competitions.judging.show', [$this->listing, 'tab' => 'lembar']))
+            ->assertDontSee('>Kunci</button>', false)->assertDontSee('Dikunci')->assertSee('Terkirim');
+        $this->judgeSession()->get(route('juri.round', $this->round))->assertDontSee('Dikunci');
+        $this->judgeSession()->get(route('juri.score.show', [$this->round, $locked]))
+            ->assertSee('Nilai sudah dikirim.')->assertDontSee('dikunci panitia');
     }
 }

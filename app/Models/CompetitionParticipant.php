@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CompetitionParticipant extends Model
@@ -32,5 +33,15 @@ class CompetitionParticipant extends Model
     public function judgings(): HasMany
     {
         return $this->hasMany(CompetitionJudging::class);
+    }
+
+    /**
+     * Later rounds this team was moved on to (the first round of a category has no rows).
+     *
+     * @return BelongsToMany<CompetitionRound, $this>
+     */
+    public function rounds(): BelongsToMany
+    {
+        return $this->belongsToMany(CompetitionRound::class, 'competition_round_participants')->withTimestamps();
     }
 }

@@ -18,12 +18,9 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <x-ui.input name="organizer_name" label="Penyelenggara (opsional)" :value="$competition->organizer_name" />
         <x-ui.input name="location" label="Kota / Tempat (opsional)" :value="$competition->location" placeholder="contoh: GOR Contoh, Bandung" />
-        <x-ui.select name="province" label="Provinsi (opsional)">
-            <option value="">— Pilih provinsi —</option>
-            @foreach (config('siapgrak.provinces') as $province)
-                <option value="{{ $province }}" @selected(old('province', $competition->province) === $province)>{{ $province }}</option>
-            @endforeach
-        </x-ui.select>
+        <x-ui.combobox name="province" label="Provinsi (opsional)" search-placeholder="Cari provinsi..."
+            :value="old('province', $competition->province)"
+            :options="['' => '— Pilih provinsi —'] + collect(config('siapgrak.provinces'))->mapWithKeys(fn ($province) => [$province => $province])->all()" />
         <x-ui.input name="registration_deadline" type="date" label="Batas Pendaftaran (opsional)" :value="$competition->registration_deadline?->format('Y-m-d')" />
         <x-ui.input name="start_date" type="date" label="Tanggal Mulai" :value="$competition->start_date?->format('Y-m-d')" required />
         <x-ui.input name="end_date" type="date" label="Tanggal Selesai (opsional)" :value="$competition->end_date?->format('Y-m-d')" />

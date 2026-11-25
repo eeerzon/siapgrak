@@ -18,11 +18,11 @@
         <span>Input oleh {{ $registration->submitter?->name ?? '—' }}</span>
         @if ($registration->submitted_at)
             <span class="text-slate-300">·</span>
-            <span>Submit {{ $registration->submitted_at->format('j M Y, H:i') }}</span>
+            <span>Submit {{ $registration->submitted_at->translatedFormat('j M Y, H:i') }}</span>
         @endif
         @if ($registration->reviewed_at)
             <span class="text-slate-300">·</span>
-            <span>Direview {{ $registration->reviewer?->name ?? '—' }} · {{ $registration->reviewed_at->format('j M Y, H:i') }}</span>
+            <span>Direview {{ $registration->reviewer?->name ?? '—' }} · {{ $registration->reviewed_at->translatedFormat('j M Y, H:i') }}</span>
         @endif
     </div>
 

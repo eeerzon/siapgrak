@@ -6,11 +6,12 @@ use App\Enums\CommunityPostType;
 use App\Http\Controllers\Controller;
 use App\Models\CommunityPost;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class CommunityController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         $type = CommunityPostType::tryFrom($this->queryText($request, 'tipe') ?? '');
         $search = $this->queryText($request, 'q');
@@ -21,6 +22,10 @@ class CommunityController extends Controller
             ->latest('published_at')
             ->paginate(12)
             ->withQueryString();
+
+        if ($redirect = $this->redirectPastLastPage($communityPosts)) {
+            return $redirect;
+        }
 
         return view('site.community.index', compact('communityPosts', 'type', 'search'));
     }

@@ -37,7 +37,7 @@
                     <span class="text-sm text-slate-400">Belum ada kode.</span>
                 @endif
                 <form method="POST" action="{{ route('dashboard.judges.access-code', $judge) }}"
-                      onsubmit="return confirm('Kode lama tidak akan berlaku lagi. Lanjutkan?');">
+                      data-confirm-title="Ganti kode akses?" data-confirm="Kode lama tidak akan berlaku lagi." data-confirm-button="Ya, ganti kode" data-confirm-icon="warning">
                     @csrf @method('PATCH')
                     <button type="submit" class="cursor-pointer text-xs font-medium text-sky-700 hover:underline">Regenerate Kode</button>
                 </form>

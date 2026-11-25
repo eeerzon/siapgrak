@@ -13,7 +13,7 @@
 
     <form method="GET" action="{{ route('dashboard.teams.index') }}" class="mb-4 flex flex-wrap items-end gap-3">
         <div class="w-full sm:w-64">
-            <x-ui.input name="search" label="Cari" :value="request('search')" placeholder="Nama team" />
+            <x-ui.input name="search" label="Cari" :value="is_string(request('search')) ? request('search') : ''" placeholder="Nama team" />
         </div>
         <div class="w-full sm:w-44">
             <x-ui.select name="status" label="Status">

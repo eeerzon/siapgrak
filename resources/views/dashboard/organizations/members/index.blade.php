@@ -74,7 +74,7 @@
                         </td>
                         <td class="px-4 py-2 text-right">
                             <form method="POST" action="{{ route('dashboard.organizations.members.destroy', [$organization, $membership]) }}"
-                                  onsubmit="return confirm('Hapus anggota ini dari organisasi?');">
+                                  data-confirm-title="Hapus anggota?" data-confirm="Anggota ini akan dikeluarkan dari organisasi." data-confirm-button="Ya, hapus">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-sm text-red-600 hover:underline">Hapus</button>

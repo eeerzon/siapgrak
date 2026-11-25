@@ -49,11 +49,11 @@
         <dl class="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-500 sm:grid-cols-4">
             <div>
                 <dt class="uppercase tracking-wide text-slate-400">Dikirim</dt>
-                <dd class="mt-0.5">{{ $sheet->submitted_at?->format('d M Y H:i') ?? '—' }}</dd>
+                <dd class="mt-0.5">{{ $sheet->submitted_at?->translatedFormat('d M Y H:i') ?? '—' }}</dd>
             </div>
             <div>
                 <dt class="uppercase tracking-wide text-slate-400">Dikunci</dt>
-                <dd class="mt-0.5">{{ $sheet->locked_at?->format('d M Y H:i') ?? '—' }}</dd>
+                <dd class="mt-0.5">{{ $sheet->locked_at?->translatedFormat('d M Y H:i') ?? '—' }}</dd>
             </div>
             <div>
                 <dt class="uppercase tracking-wide text-slate-400">Direvisi</dt>
@@ -70,7 +70,7 @@
                 @can('manageJudging', $event)
                     @if ($sheet->status->value === 'submitted')
                         <form method="POST" action="{{ route('dashboard.score-sheets.lock', $sheet) }}"
-                              onsubmit="return confirm('Kunci lembar skor ini? Juri tidak bisa mengubahnya lagi setelah dikunci.');">
+                              data-confirm-title="Kunci lembar skor?" data-confirm="Juri tidak bisa mengubahnya lagi setelah dikunci." data-confirm-button="Ya, kunci" data-confirm-icon="warning">
                             @csrf
                             <x-ui.button type="submit" size="sm">Kunci</x-ui.button>
                         </form>
@@ -104,7 +104,7 @@
                     <li class="border-b border-slate-100 pb-2 last:border-0 last:pb-0">
                         <div class="text-slate-700">{{ $revision->reason }}</div>
                         <div class="mt-0.5 text-xs text-slate-400">
-                            dari status "{{ $revision->previous_status }}" oleh {{ $revision->requestedBy?->name ?? 'user terhapus' }} · {{ $revision->created_at->format('d M Y H:i') }}
+                            dari status "{{ $revision->previous_status }}" oleh {{ $revision->requestedBy?->name ?? 'user terhapus' }} · {{ $revision->created_at->translatedFormat('d M Y H:i') }}
                         </div>
                     </li>
                 @endforeach

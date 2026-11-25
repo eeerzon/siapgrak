@@ -49,6 +49,21 @@ class CompetitionRound extends Model
     }
 
     /**
+     * Teams chosen for this round. Only used for rounds after the first: the first round of a
+     * category is open to every team in it. Use CompetitionJudgingService::entrants() to get
+     * the teams of any round.
+     *
+     * @return BelongsToMany<CompetitionParticipant, $this>
+     */
+    public function participants(): BelongsToMany
+    {
+        return $this->belongsToMany(CompetitionParticipant::class, 'competition_round_participants')
+            ->withTimestamps()
+            ->orderBy('performance_order')
+            ->orderBy('competition_number');
+    }
+
+    /**
      * @return HasMany<CompetitionJudging, $this>
      */
     public function judgings(): HasMany

@@ -38,7 +38,7 @@
 
                                             @if (! $roundStatus || $roundStatus === 'draft')
                                                 <form method="POST" action="{{ route('dashboard.judging-rounds.results.calculate', $round) }}"
-                                                      onsubmit="return confirm('Hitung ulang hasil round ini dari skor yang sudah disubmit/dikunci juri?');">
+                                                      data-confirm-title="Hitung ulang hasil?" data-confirm="Hasil round ini dihitung ulang dari skor yang sudah disubmit atau dikunci juri." data-confirm-button="Ya, hitung ulang" data-confirm-icon="question">
                                                     @csrf
                                                     <input type="hidden" name="_tab" value="results">
                                                     <x-ui.button type="submit" size="sm" variant="secondary">Hitung Ulang Hasil</x-ui.button>
@@ -47,7 +47,7 @@
 
                                             @if ($roundStatus === 'draft')
                                                 <form method="POST" action="{{ route('dashboard.judging-rounds.results.finalize', $round) }}"
-                                                      onsubmit="return confirm('Finalisasi hasil round ini? Hitung Ulang tidak bisa lagi sampai dibuka ulang.');">
+                                                      data-confirm-title="Finalisasi hasil?" data-confirm="Setelah difinalisasi, Hitung Ulang tidak bisa dipakai sampai hasil dibuka ulang." data-confirm-button="Ya, finalisasi" data-confirm-icon="warning">
                                                     @csrf
                                                     <input type="hidden" name="_tab" value="results">
                                                     <x-ui.button type="submit" size="sm">Finalize</x-ui.button>
@@ -172,7 +172,7 @@
                             </span>
                         </span>
                         <form method="POST" action="{{ route('dashboard.awards.destroy', $award) }}"
-                              onsubmit="return confirm('Hapus penghargaan ini?');">
+                              data-confirm-title="Hapus penghargaan ini?" data-confirm="Penghargaan yang sudah dihapus tidak bisa dikembalikan." data-confirm-button="Ya, hapus">
                             @csrf @method('DELETE')
                             <button type="submit" class="cursor-pointer text-xs text-red-600 hover:underline">Hapus</button>
                         </form>

@@ -18,7 +18,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hasil {{ $competition->title }} · Siapgrak</title>
+    <title>Hasil {{ $activeCategory ? $activeCategory->name.' · ' : '' }}{{ $competition->title }} · Siapgrak</title>
     <meta name="description" content="Peringkat dan nilai peserta {{ $competition->title }}.">
     @include('partials.head-fonts')
     @include('partials.head-icons')
@@ -54,8 +54,11 @@
     </header>
 
     <main class="mx-auto max-w-[900px] px-3.5 pt-8 pb-16 md:px-5 md:pt-10">
-        <p class="text-xs font-bold tracking-[0.15em] text-(--kr-accent-bright) uppercase">{{ $competition->title }}</p>
-        <h1 class="mt-2 text-[28px] font-bold tracking-[-0.02em] md:text-[38px]">Hasil Penilaian</h1>
+        <a href="{{ route('site.competitions.show', $competition->slug) }}" class="inline-flex items-start gap-1.5 text-xs font-bold tracking-[0.15em] text-(--kr-accent-bright) uppercase hover:underline">
+            <span aria-hidden="true">←</span>
+            <span>{{ $competition->title }}</span>
+        </a>
+        <h1 class="mt-2 text-[28px] font-bold tracking-[-0.02em] md:text-[38px]">Hasil Penilaian{{ $activeCategory ? ' '.$activeCategory->name : '' }}</h1>
         <p class="mt-2 text-[15px] text-(--kr-muted)">Hasil resmi dari panitia.</p>
 
         <div class="mt-5 flex items-center gap-2.5 rounded-xl border border-(--kr-border) bg-(--kr-surface) px-3.5 py-3">
@@ -63,11 +66,40 @@
             <p class="text-[13px] leading-relaxed text-(--kr-muted)">Identitas juri dirahasiakan. Ketuk kartu untuk melihat nilai per kriteria.</p>
         </div>
 
-        @foreach ($competition->categories as $category)
-            @foreach ($category->rounds as $round)
+        <!-- @if ($categories->count() > 1)
+            {{-- Category switcher: each category has its own shareable link (/hasil/{id}). --}}
+            <nav class="mt-5 -mx-3.5 flex gap-2 overflow-x-auto px-3.5 pb-1 md:mx-0 md:flex-wrap md:px-0" aria-label="Kategori">
+                {{-- Keep this loop free of inline php directives: the php block further down would swallow them. --}}
+                @foreach ([null, ...$categories] as $item)
+                    <a href="{{ $item ? route('site.competitions.results.category', [$competition->slug, $item->id]) : route('site.competitions.results', $competition->slug) }}"
+                       @if ($item?->id === $activeCategory?->id) aria-current="page" @endif
+                       class="shrink-0 rounded-full border px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors {{ $item?->id === $activeCategory?->id ? 'border-(--kr-accent) bg-(--kr-accent) text-white' : 'border-(--kr-border) bg-(--kr-surface) text-(--kr-muted) hover:border-(--kr-border-strong) hover:text-(--kr-text)' }}">
+                        {{ $item?->name ?? 'Semua kategori' }}
+                    </a>
+                @endforeach
+            </nav>
+        @endif -->
+
+        @foreach ($sections as $section)
+            @foreach ([$section['round']] as $round)
                 <section class="mt-10">
-                    <p class="text-xs font-bold tracking-[0.15em] text-(--kr-accent) uppercase">{{ $category->name }}</p>
-                    <h2 class="mt-1 text-2xl font-bold tracking-[-0.02em] md:text-[32px]">{{ $round->name }}</h2>
+                    <p class="text-xs font-bold tracking-[0.15em] text-(--kr-accent) uppercase">{{ $section['category']->name }}</p>
+                    @if ($section['rounds']->count() > 1)
+                        {{-- Round switcher: one round at a time, each with its own link (/hasil/{category}/{round}). --}}
+                        <nav class="mt-3 flex flex-wrap gap-2" aria-label="{{ 'Babak '.$section['category']->name }}">
+                            @foreach ($section['rounds'] as $item)
+                                <a href="{{ route('site.competitions.results.round', [$competition->slug, $section['category']->id, $item->id]) }}"
+                                   @if ($item->is($round)) aria-current="page" @endif
+                                   class="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors {{ $item->is($round) ? 'border-(--kr-accent) bg-(--kr-accent) text-white' : 'border-(--kr-border) bg-(--kr-surface) text-(--kr-muted) hover:border-(--kr-border-strong) hover:text-(--kr-text)' }}">
+                                    {{ $item->name }}
+                                    @unless ($item->isPublished())
+                                        <span class="text-xs font-medium opacity-75">· berlangsung</span>
+                                    @endunless
+                                </a>
+                            @endforeach
+                        </nav>
+                    @endif
+                    <h2 class="mt-4 text-2xl font-bold tracking-[-0.02em] md:text-[32px]">{{ $round->name }}</h2>
 
                     @if (! $round->isPublished())
                         <div class="mt-5 flex flex-col items-center rounded-2xl border border-(--kr-border) bg-(--kr-surface) px-6 py-12 text-center">
@@ -95,34 +127,34 @@
                                 <details class="group rounded-[14px] border border-(--kr-border) bg-(--kr-surface) shadow-[0_6px_18px_var(--kr-shadow)] open:border-(--kr-accent-deep)">
                                     <summary class="cursor-pointer list-none p-3.5 md:p-[18px]">
                                         <div class="flex items-center">
-                                            <div class="w-[34px] shrink-0 md:w-12">
-                                                <p class="text-[22px] font-bold text-(--kr-accent-bright) tabular-nums md:text-[28px]">{{ $result->rank }}</p>
+                                            <div class="w-7 shrink-0 md:w-12">
+                                                <p class="text-xl font-bold text-(--kr-accent-bright) tabular-nums md:text-[28px]">{{ $result->rank }}</p>
                                                 @if ($rankCounts[$result->rank] > 1)
-                                                    <p class="text-[10px] font-bold tracking-[0.08em] text-(--kr-accent-bright)">SERI</p>
+                                                    <p class="text-[9px] font-bold tracking-[0.08em] text-(--kr-accent-bright) md:text-[10px]">SERI</p>
                                                 @endif
                                             </div>
-                                            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] border border-(--kr-border-strong) text-xl font-bold text-white/70 md:h-[68px] md:w-[68px]"
+                                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-(--kr-border-strong) text-base font-bold text-white/70 md:h-[68px] md:w-[68px] md:text-xl"
                                                  style="background: linear-gradient(160deg, hsl({{ $hue }} 45% 28%), hsl({{ $hue }} 50% 14%))">
                                                 {{ $badge($participant) }}
                                             </div>
-                                            <div class="ml-3 min-w-0 flex-1 md:ml-4">
+                                            <div class="ml-2.5 min-w-0 flex-1 md:ml-4">
                                                 @if ($participant->competition_number)
-                                                    <p class="text-xs font-bold tracking-[0.06em] text-(--kr-accent)">#{{ $participant->competition_number }}</p>
+                                                    <p class="text-[11px] font-bold tracking-[0.06em] text-(--kr-accent) md:text-xs">#{{ $participant->competition_number }}</p>
                                                 @endif
-                                                <p class="mt-0.5 text-base leading-tight font-bold md:text-lg">{{ $participant->name }}</p>
+                                                <p class="mt-0.5 text-[15px] leading-tight font-bold break-words md:text-lg">{{ $participant->name }}</p>
                                                 @if ($participant->institution)
-                                                    <p class="text-[13px] text-(--kr-muted)">{{ $participant->institution }}</p>
+                                                    <p class="truncate text-xs text-(--kr-muted) md:text-[13px]">{{ $participant->institution }}</p>
                                                 @endif
                                             </div>
-                                            <div class="ml-2.5 shrink-0 text-right">
-                                                <p class="text-xl font-bold tabular-nums md:text-2xl">{{ $number($result->weighted_score) }}</p>
-                                                <p class="text-[11px] font-semibold text-(--kr-muted)">Nilai Akhir</p>
+                                            <div class="ml-2 shrink-0 text-right">
+                                                <p class="text-lg font-bold tabular-nums md:text-2xl">{{ $number($result->weighted_score) }}</p>
+                                                <p class="text-[10px] font-semibold text-(--kr-muted) md:text-[11px]">Nilai Akhir</p>
                                             </div>
                                         </div>
-                                        <div class="mt-3.5 flex items-center gap-2">
-                                            <div class="flex flex-1 flex-wrap gap-2">
+                                        <div class="mt-3 flex items-center gap-2 md:mt-3.5">
+                                            <div class="flex flex-1 flex-wrap gap-1.5 md:gap-2">
                                                 @foreach ($judgeRows as $judgeRow)
-                                                    <span class="rounded-lg border border-(--kr-border) bg-(--kr-surface-alt) px-[11px] py-[7px] text-xs text-(--kr-muted)">{{ $judgeRow['label'] }}&nbsp; <span class="text-[13px] font-bold text-(--kr-text) tabular-nums">{{ $number($judgeRow['total']) }}</span></span>
+                                                    <span class="rounded-lg border border-(--kr-border) bg-(--kr-surface-alt) px-2.5 py-1.5 text-xs text-(--kr-muted) md:px-[11px] md:py-[7px]">{{ $judgeRow['label'] }}&nbsp; <span class="text-[13px] font-bold text-(--kr-text) tabular-nums">{{ $number($judgeRow['total']) }}</span></span>
                                                 @endforeach
                                             </div>
                                             <svg class="h-6 w-6 shrink-0 text-(--kr-muted) transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" /></svg>
@@ -173,11 +205,19 @@
     </main>
 
     <script>
-        document.getElementById('theme-toggle').addEventListener('click', () => {
-            const root = document.documentElement;
-            root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
-            try { localStorage.setItem('siapgrak-results-theme', root.dataset.theme); } catch {}
-        });
+        (() => {
+            const toggle = document.getElementById('theme-toggle');
+            // Without the toggle in the header, a dark mode remembered earlier could never be switched off: use light.
+            if (!toggle) {
+                document.documentElement.dataset.theme = 'light';
+                return;
+            }
+            toggle.addEventListener('click', () => {
+                const root = document.documentElement;
+                root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+                try { localStorage.setItem('siapgrak-results-theme', root.dataset.theme); } catch {}
+            });
+        })();
     </script>
 </body>
 </html>

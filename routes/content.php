@@ -22,6 +22,8 @@ Route::name('site.')->group(function () {
     Route::get('info-lomba', [SiteCompetitionController::class, 'index'])->name('competitions.index');
     Route::get('info-lomba/{slug}', [SiteCompetitionController::class, 'show'])->name('competitions.show');
     Route::get('info-lomba/{slug}/hasil', [SiteCompetitionResultController::class, 'show'])->name('competitions.results');
+    Route::get('info-lomba/{slug}/hasil/{category}', [SiteCompetitionResultController::class, 'show'])->whereNumber('category')->name('competitions.results.category');
+    Route::get('info-lomba/{slug}/hasil/{category}/{round}', [SiteCompetitionResultController::class, 'show'])->whereNumber(['category', 'round'])->name('competitions.results.round');
 
     Route::get('agenda', [SiteAgendaController::class, 'index'])->name('agenda.index');
     Route::get('agenda/{slug}', [SiteAgendaController::class, 'show'])->name('agenda.show');
@@ -54,6 +56,9 @@ Route::middleware(['auth', EnsurePlatformAdmin::class])
                 Route::post('rounds/{round}/criteria', [SetupController::class, 'storeCriterion'])->name('criteria.store');
                 Route::put('criteria/{criterion}', [SetupController::class, 'updateCriterion'])->name('criteria.update');
                 Route::delete('criteria/{criterion}', [SetupController::class, 'destroyCriterion'])->name('criteria.destroy');
+                Route::post('rounds/{round}/participants', [SetupController::class, 'addRoundParticipants'])->name('round-participants.store');
+                Route::post('rounds/{round}/participants/top', [SetupController::class, 'promoteTopParticipants'])->name('round-participants.top');
+                Route::delete('rounds/{round}/participants/{participant}', [SetupController::class, 'removeRoundParticipant'])->name('round-participants.destroy');
                 Route::post('rounds/{round}/judges', [SetupController::class, 'assignJudge'])->name('judges.assign');
                 Route::delete('rounds/{round}/judges/{judge}', [SetupController::class, 'unassignJudge'])->name('judges.unassign');
                 Route::post('judgings/{judging}/lock', [ScoringController::class, 'lock'])->name('judgings.lock');
@@ -81,7 +86,7 @@ Route::middleware(['auth', EnsurePlatformAdmin::class])
 // user account; the organizer-event panel at /judge stays separate.
 Route::prefix('juri')->name('juri.')->group(function () {
     Route::get('masuk', [JuriAccessController::class, 'create'])->name('access.create');
-    Route::post('masuk', [JuriAccessController::class, 'store'])->name('access.store')->middleware('throttle:6,1');
+    Route::post('masuk', [JuriAccessController::class, 'store'])->name('access.store')->middleware('throttle:10,1');
     Route::post('keluar', [JuriAccessController::class, 'destroy'])->name('logout');
 
     Route::middleware(EnsureCompetitionJudgeSession::class)->group(function () {

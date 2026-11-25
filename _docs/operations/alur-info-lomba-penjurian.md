@@ -13,7 +13,7 @@ Semua langkah admin dilakukan setelah masuk ke dashboard (`/login`) dengan akun 
 2. Siapkan penjurian          → kategori, peserta, babak, kriteria (bobot total 100%)
 3. Tambah & tugaskan juri     → setiap juri dapat kode akses 8 karakter
 4. Juri menilai di /juri      → simpan draft, lalu kirim
-5. Admin cek lembar nilai     → kunci, atau buka ulang dengan alasan
+5. Admin cek lembar nilai     → buka ulang dengan alasan kalau perlu koreksi
 6. Hitung & publikasikan      → peringkat tampil di /info-lomba/{slug}/hasil
 7. Bagikan link hasil         → tombol "Salin Link"
 ```
@@ -56,7 +56,7 @@ Halaman Penjurian punya empat tab. Kerjakan berurutan.
 
 ### Tab "Babak & Juri"
 
-1. **Tambah babak** per kategori, misalnya "Babak Final".
+1. **Tambah babak** per kategori, misalnya "Babak Final". **Buat babak sesuai urutan lomba** (misalnya Grup → Penyisihan → Final): urutan babak mengikuti urutan dibuat dan tidak bisa diubah. Babak yang dibuat pertama dianggap babak pertama (diikuti semua peserta kategori).
 2. **Tambah kriteria** di setiap babak:
    - Nama dan keterangan untuk juri (misalnya "Kerapian barisan, ketepatan aba-aba").
    - **Bobot %, wajib diisi.**
@@ -70,6 +70,17 @@ Halaman Penjurian punya empat tab. Kerjakan berurutan.
    | Penilaian berjalan · kriteria terkunci | Sudah ada juri yang menyimpan nilai. Kriteria tidak bisa diubah lagi (lihat aturan di bawah). |
 
 4. **Tugaskan juri** ke babak (pilih dari daftar juri milik Anda). Kode akses juri tampil di sini.
+5. **Pilih peserta babak** (bagian "Peserta babak ini" di bawah kartu babak):
+   - **Babak pertama** di kategori itu otomatis diikuti semua peserta kategori.
+   - **Babak berikutnya** (misalnya Penyisihan, Final) hanya diikuti peserta yang Anda pilih. Selama belum ada peserta, juri belum bisa menilai babak itu.
+   - Cara cepat: **Ambil peserta teratas dari {babak sebelumnya}**, isi jumlahnya (misalnya 10). Yang diambil adalah peringkat 1–10 babak sebelumnya; kalau ada yang seri di batas, semuanya ikut. Babak sebelumnya harus sudah dihitung hasilnya.
+   - Atau **Pilih manual** dengan mencentang peserta. Daftarnya hanya berisi peserta babak sebelumnya, urut peringkatnya (misalnya Babak III hanya menampilkan peserta Babak II).
+   - **Menambah peserta ke babak yang sudah berjalan:** ditolak kalau babak berikutnya sudah mulai dinilai. Kalau hasil babak itu sedang dipublikasikan, tarik dulu dari publik. Kalau babak berikutnya sudah punya peserta tapi belum dinilai, penambahan boleh, dan peserta babak berikutnya **dikosongkan otomatis** karena dipilih dari peringkat lama; pilih ulang setelah babak ini selesai dinilai dan dihitung ulang.
+   - Peserta bisa dikeluarkan (tombol ×) selama belum dinilai di babak itu. Yang sudah dinilai ditandai • dan tidak bisa dikeluarkan.
+   - Peserta babak berikutnya **baru bisa dipilih setelah babak sebelumnya selesai dinilai dan dipublikasikan**. Selesai dinilai = semua juri sudah mengirim nilai untuk semua peserta (draft belum dihitung); sebelum itu tampil "{babak sebelumnya} masih berlangsung" beserta jumlah lembar terkirim. Kalau sudah selesai tapi belum dipublikasikan, tampil "Hasil {babak sebelumnya} belum dipublikasikan" dengan tautan ke tab Hasil.
+6. Babak yang **selesai dinilai** ditandai "Selesai dinilai" (atau "Selesai · hasil diumumkan" setelah dipublikasikan), dan form Tugaskan juri disembunyikan. Kalau ada lembar yang dibuka ulang, babak kembali berlangsung.
+
+Tab kategori di bawah tab utama memilih kategori yang sedang dikelola; pilihannya tetap saat pindah tab.
 
 > **Aturan kunci kriteria:** begitu ada satu lembar nilai di sebuah babak, kriteria **terkunci**: tidak bisa ditambah, diubah, atau dihapus, dan tombol Edit tidak tampil lagi. Ini supaya semua peserta dinilai dengan kriteria yang sama dan nilai akhir selalu berskala 0–100. Jadi rapikan kriteria, termasuk nama dan keterangannya, **sebelum** juri mulai menilai.
 
@@ -95,7 +106,7 @@ Juri tidak butuh akun atau password, cukup kode akses.
 
 1. Juri memasukkan **kode akses**.
 2. Beranda menampilkan babak yang ditugaskan beserta progresnya ("3 dari 6 peserta sudah dikirim nilainya").
-3. Pilih babak, lalu pilih peserta. Status setiap peserta: **Belum dinilai**, **Draft x/y**, **Terkirim**, atau **Dikunci**.
+3. Pilih babak, lalu pilih peserta. Status setiap peserta: **Belum dinilai**, **Draft x/y**, atau **Terkirim**.
 4. Isi nilai setiap kriteria (sesuai rentang) dan catatan kalau perlu:
    - **Simpan Draft:** nilai tersimpan dan masih bisa diubah.
    - **Kirim Skor Final:** menyimpan isian lalu langsung mengirimnya dalam satu langkah. Tombol ini nonaktif sampai **semua kriteria terisi**, dengan keterangan berapa kriteria yang belum diisi. Setelah dikirim, juri tidak bisa mengubahnya lagi.
@@ -114,7 +125,7 @@ Juri tidak butuh akun atau password, cukup kode akses.
 **Tab "Lembar Nilai"** di halaman Penjurian
 
 - Tabel **peserta × juri** memperlihatkan status setiap lembar.
-- **Kunci:** mengunci lembar yang sudah dikirim, sebagai tanda sudah diperiksa panitia.
+- *(Fitur **Kunci** sedang disembunyikan sejak 19 Nov 2026: bagi juri, lembar terkirim dan dikunci sama-sama tidak bisa diubah. Lembar lama yang berstatus dikunci tampil sebagai Terkirim.)*
 - Di atas setiap babak ada **daftar cek kesiapan**: bobot 100%, jumlah juri yang ditugaskan, dan jumlah peserta. Label kuning berarti masih ada yang kurang.
 - **Buka ulang:** mengembalikan lembar ke draft supaya juri bisa memperbaiki nilai.
   - **Alasan wajib diisi** dan tercatat di riwayat, beserta siapa yang membuka dan status sebelumnya.
@@ -129,13 +140,13 @@ Juri tidak butuh akun atau password, cukup kode akses.
 
 1. **Hitung Hasil / Hitung Ulang:** menghitung peringkat untuk dilihat admin. Belum tampil ke publik.
 2. **Publikasikan Hasil:** menghitung ulang, lalu menampilkan peringkat babak itu di halaman publik.
-3. **Tarik dari publik:** menyembunyikan lagi hasilnya. Halaman publik kembali menampilkan "masih berlangsung".
+3. **Tarik dari publik:** menyembunyikan lagi hasilnya. Halaman publik kembali menampilkan "masih berlangsung". Peserta babak berikutnya yang sudah dipilih (dan belum dinilai) ikut dikosongkan. Tidak bisa dilakukan lagi kalau babak berikutnya sudah mulai dinilai, supaya peringkat yang dipakai babak itu tidak berubah. Selama hasil dipublikasikan, juri baru juga tidak bisa ditugaskan ke babak tersebut.
 
 **Cara nilai dihitung:**
-- Hanya lembar **Terkirim** atau **Dikunci** yang dihitung. Draft diabaikan.
+- Hanya lembar **Terkirim** yang dihitung. Draft diabaikan.
 - Untuk setiap kriteria, nilai dari semua juri **dirata-rata**.
 - **Nilai akhir** = jumlah dari (rata-rata kriteria × bobot kriteria ÷ 100).
-- Peserta yang belum punya nilai lengkap untuk semua kriteria **tidak ikut diperingkat**.
+- Peserta baru **masuk peringkat setelah semua juri** yang ditugaskan di babak itu mengirim nilainya. Selama masih ada juri yang belum mengirim (atau masih draft), peserta itu tidak diperingkat.
 - Nilai akhir yang sama mendapat peringkat yang sama dan ditandai **SERI** (contoh: 1, 1, 3).
 
 **Contoh** (bobot PBB 60%, Formasi 40%, dua juri):
@@ -148,15 +159,19 @@ Juri tidak butuh akun atau password, cukup kode akses.
 
 Nilai akhir = 80 × 0,6 + 70 × 0,4 = **76**.
 
-Publikasi ditolak kalau belum ada satu pun peserta dengan nilai lengkap.
+Publikasi ditolak kalau belum ada satu pun peserta yang sudah dinilai semua juri. Kalau masih ada lembar yang belum dikirim, popup konfirmasi Publikasikan menyebut jumlahnya sebelum admin melanjutkan.
 
-Di bawah tabel peringkat ada daftar **"Belum diperingkat"**: peserta yang belum masuk peringkat beserta alasannya (misalnya "Belum ada nilai terkirim untuk: Formasi") dan juri yang masih ditunggu (misalnya "Hendra Wijaya (masih draft)").
+Di bawah tabel peringkat ada daftar **"Belum diperingkat"**:
+- Di atas: ringkasan per juri, misalnya "Hendra Wijaya: 4/44 terkirim · 37 belum menilai · 3 masih draft". Dari sini kelihatan juri mana yang perlu dihubungi.
+- Di bawahnya: peserta beserta alasannya (misalnya "Baru 1 dari 2 juri yang mengirim nilai.") dan juri yang masih ditunggu (misalnya "Hendra Wijaya (masih draft)"). Awalnya hanya 5 peserta yang tampil; tekan "Tampilkan semua" untuk melihat sisanya.
 
 ---
 
 ## 7. Membagikan link hasil
 
 - Di tab **Lembar Nilai** atau **Hasil**, blok **"Link hasil publik"** muncul begitu ada **satu lembar nilai yang sudah dikirim** juri.
+- Kalau lomba punya lebih dari satu kategori, ada link **Semua kategori** dan satu link per kategori (misalnya khusus SMA dan khusus SMP).
+- Halaman publik menampilkan **satu babak per kategori**. Yang terbuka pertama kali adalah babak terakhir yang sudah dipublikasikan (biasanya Final). Pengunjung bisa pindah babak lewat tombol babak; babak yang belum dipublikasikan ditandai "berlangsung". Tiap babak juga punya link sendiri (`/hasil/{kategori}/{babak}`), misalnya untuk dibagikan saat pengumuman Babak Penyisihan.
 - Tekan **Salin Link**, lalu bagikan ke peserta (WhatsApp, Instagram, dan sebagainya). Kalau browser menolak menyalin otomatis, link langsung terblok dan tombol meminta Anda menekan **Ctrl+C**.
 - Bentuk link: `/info-lomba/{slug-lomba}/hasil`. Satu link berlaku untuk semua kategori dan babak di lomba itu.
 - Link boleh dibagikan lebih awal. Selama babak belum dipublikasikan, pengunjung hanya melihat "{Babak} masih berlangsung".
@@ -211,7 +226,7 @@ Sebagian besar kendala ini sudah dijelaskan langsung di layar. Tabel ini untuk r
 | Kirim Skor Final ditolak "Nilai belum lengkap". | Ada kriteria yang belum diisi. Isi, Simpan Draft, lalu Kirim. |
 | Tidak bisa menambah kriteria atau mengubah bobot. | Penilaian babak sudah dimulai (kriteria terkunci). |
 | Tombol "Buka ulang" tidak muncul. | Hasil babak sedang tampil publik. Tarik dulu di tab Hasil. |
-| Peserta tidak muncul di peringkat. | Nilainya belum lengkap dari juri, atau lembarnya masih draft. |
+| Peserta tidak muncul di peringkat. | Belum semua juri mengirim nilainya, atau ada lembar yang masih draft. Cek "Belum diperingkat" di tab Hasil. |
 | Link hasil 404. | Info Lomba masih Draft, atau belum punya babak. |
 | Tombol "Salin Link" tidak muncul. | Belum ada satu pun lembar nilai yang dikirim juri. |
 

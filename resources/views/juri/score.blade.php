@@ -20,11 +20,13 @@
         {{-- Read-only once submitted/locked (fr-score-sheet-lifecycle.md
              Keputusan D) — only an organizer reopen brings this back to draft. --}}
         <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {{-- Lock feature hidden for now (2026-11-19): a locked sheet reads as sent.
             @if ($judging->status->value === 'locked')
                 <p class="font-semibold">Nilai sudah dikunci panitia.</p>
             @else
+            --}}
                 <p class="font-semibold">Nilai sudah dikirim.</p>
-            @endif
+            {{-- @endif --}}
             <p class="mt-0.5">Kalau ada yang perlu dikoreksi, minta panitia membuka ulang lembar ini.</p>
         </div>
     @endunless
@@ -101,6 +103,7 @@
                     <button type="submit" form="score-form" class="flex-1 cursor-pointer rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Simpan Draft</button>
                     {{-- Same form + kirim=1: saves what is typed, then sends, in one step. --}}
                     <button type="submit" form="score-form" name="kirim" value="1" data-send
+                            data-confirm-title="Kirim nilai final?" data-confirm="Setelah dikirim, nilai tidak bisa diubah kecuali panitia membuka ulang." data-confirm-button="Ya, kirim" data-confirm-icon="question"
                             class="flex-1 cursor-pointer rounded-md bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300">Kirim Skor Final</button>
                 </div>
             </div>
@@ -122,12 +125,6 @@
                 };
                 form.addEventListener('input', update);
                 update();
-
-                form.addEventListener('submit', (event) => {
-                    if (event.submitter === send && !confirm('Kirim nilai final? Setelah dikirim, nilai tidak bisa diubah kecuali panitia membuka ulang.')) {
-                        event.preventDefault();
-                    }
-                });
             })();
         </script>
     @endif

@@ -60,7 +60,7 @@
                 @can('manageStaff', $event)
                     <x-ui.table-td align="right">
                         <form method="POST" action="{{ route('dashboard.events.staff.destroy', [$event, $member]) }}"
-                              onsubmit="return confirm('Hapus staff ini dari event?');">
+                              data-confirm-title="Hapus staff?" data-confirm="Staff ini akan dihapus dari event." data-confirm-button="Ya, hapus">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="cursor-pointer text-sm font-medium text-red-600 hover:underline">Hapus</button>

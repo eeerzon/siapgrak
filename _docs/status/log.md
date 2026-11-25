@@ -4,6 +4,104 @@ Log per sesi kerja (WAJIB diupdate, lihat CLAUDE.md §"Status Update"). Entry ba
 
 ---
 
+## 2026-11-25 — Cek bug dashboard
+
+**Diselesaikan:**
+- Crawl semua halaman dashboard sebagai admin + fuzz query (`page`, `status`, `search`, `tab`, `category`, array, karakter aneh). Sebelum fix ada 2 sumber error 500; sekarang 0.
+- **Halaman Anggota Organisasi selalu error 500.** Penyebabnya, `belongsTo(User::class)` tanpa kolom membuat Laravel menebak `user_id_user`, karena PK User adalah `id_user`. Ditambahkan `'user_id'` eksplisit di 5 model: OrganizationUser, EventStaff, ActivityLog, Judge, TeamMember. Efek sampingnya ikut beres: nama staf event sebelumnya selalu tampil "—".
+- Filter `?status[]=` / `?search[]=` di Events, Teams, Juri, dan Pendaftaran tidak lagi 500. Memakai helper `queryText`, dan view tidak lagi meng-echo array.
+- Pencarian dashboard (Events, Teams, Juri): `%` dan `_` dicari literal, lewat helper baru `Controller::containsPattern` dengan `escape '!'`.
+- Test baru `tests/Feature/Dashboard/DashboardEdgeCaseTest.php` (5 test).
+- Catatan cakupan: modul admin yang aktif cuma `/dashboard` + `/dashboard/content/*`. Modul events/teams/org di atas adalah modul lama; perbaikannya dibiarkan atas persetujuan Ersa.
+- **Bug content/penjurian:**
+  - Tambah peserta (atau pindah kategori) sekarang ditolak kalau hasil babak pertama kategori itu sudah publik atau babak berikutnya sudah mulai dinilai. Aturannya sama dengan `teamListClosedReason` untuk babak lanjutan. Peserta baru juga mengosongkan daftar peserta babak berikutnya yang dipilih dari peringkat lama.
+  - Juri nonaktif tidak bisa ditugaskan ke babak. Sebelumnya babak jadi macet karena juri itu tidak bisa login, jadi lembarnya tidak pernah lengkap.
+  - Bobot kriteria maksimal 2 desimal, sesuai kolom `decimal(5,2)`. Sebelumnya 3 × 33,333 di MySQL tersimpan 99,99, jadi babak tidak pernah siap.
+  - Pencarian juri content: `%`/`_` dicari literal.
+  - `contact_persons[]` yang bukan array jadi error validasi, bukan 500.
+- Test baru `tests/Feature/CompetitionJudging/ContentJudgingEdgeCaseTest.php` (6 test). Suite Feature (MySQL): 523 lulus, 5 skip.
+
+**Blocker/keputusan:** tidak ada.
+
+**Next:** perubahan belum di-commit (Ersa yang push).
+
+---
+
+## 2026-11-24 — Rapikan responsive site publik, dropdown dengan pencarian
+
+**Diselesaikan:**
+- Audit responsive semua halaman publik di 360/640/1024 px: tidak ada yang meluber ke samping.
+- Header: Daftar + Masuk satu grup, tetap sebaris dengan logo di HP (dulu Masuk turun ke baris kedua). Saat login cukup satu tombol Dashboard (dulu dua). Subjudul logo disembunyikan di bawah 380 px.
+- Footer: Jelajahi dan Ikuti Kami dua kolom di HP/tablet, padding lebih pendek.
+- Filter Info Lomba: di tablet pencarian satu baris penuh, Jenjang + Provinsi berdampingan.
+- Komponen baru `x-ui.combobox` (+ `resources/js/combobox.js`): dropdown dengan kotak pencarian di dalamnya, keyboard (panah, Enter, Esc). Dipakai untuk Provinsi (filter publik dan form Info Lomba di dashboard) serta Jenjang (tanpa pencarian, supaya tampilannya seragam).
+- Kartu lomba di HP: padding dan teks lebih kecil, judul maksimal 3 baris (lengkapnya di `title`), chip jenjang/status lebih ringkas.
+- Halaman hasil di HP: kotak nomor 44 px (dulu 56), kolom peringkat dan nilai lebih sempit, jadi nama tim dapat ruang lebih lebar. Tampilan md+ tetap sama.
+- Audit responsive dashboard (14 halaman, 360/768 px):
+  - Dashboard utama meluber ke 480 px di HP karena judul lomba panjang. Grid diberi `grid-cols-1`, judul dipotong dengan "…".
+  - Tab konten (Info Lomba/Agenda/Kabar/Juri) dan tab Penjurian (Peserta/Babak & Juri/Lembar/Hasil) memakai label pendek di HP. Sebelumnya tab aktif "Juri"/"Hasil" tidak kelihatan.
+  - Link hasil publik: di HP kolom link selebar penuh, tombol Salin/Buka di bawahnya.
+  - Blok kode akses juri rata kiri di HP.
+- Bug halaman publik:
+  - Cari "%" atau "_" menampilkan semua konten karena dianggap wildcard LIKE. Sekarang di-escape di `IsPublicContent::scopeSearch`; ikut berlaku untuk pencarian di dashboard.
+  - `?page=` melewati halaman terakhir menampilkan "Belum ada lomba…" padahal ada isinya. Sekarang redirect ke halaman terakhir (`Controller::redirectPastLastPage`, dipakai di Info Lomba, Agenda, Kabar).
+  - Dropdown Provinsi berisi provinsi yang lombanya hanya ada di tab lain, jadi hasilnya kosong. Sekarang hanya provinsi yang punya lomba di tab aktif; provinsi yang sedang dipilih tetap ada di daftar.
+  - Halaman hasil: tombol ganti tema disembunyikan, tapi mode gelap yang tersimpan di browser tetap terpasang tanpa cara mematikannya. Tanpa tombol, halaman sekarang selalu terang.
+  - Batas pendaftaran Info Lomba tidak boleh setelah lomba selesai (`end_date`, atau `start_date` kalau lomba sehari). Sebelumnya lomba yang sudah lewat bisa tetap tampil "Buka s.d. …". Data lokal tidak ada yang bentrok.
+  - Nama bulan di dashboard jadi bahasa Indonesia ("1 Des", bukan "1 Dec"): `Carbon::setLocale('id')` di `AppServiceProvider` (APP_LOCALE tidak diubah), serta `format('… M …')` → `translatedFormat` di lembar nilai, event, dan registrasi.
+  - Halaman hasil: nama lomba di atas judul sekarang tautan balik ke halaman detail lomba.
+  - Test baru: `tests/Feature/PublicContent/PublicSiteEdgeCaseTest.php`.
+- Layout site sekarang memuat `app.js` (Alpine). Auto-filter mengabaikan field tanpa `name`, supaya kotak cari di dropdown tidak memicu submit.
+
+**Test:** 506 lulus, 5 skip.
+
+---
+
+## 2026-11-19 — Modal buka ulang, fitur Kunci disembunyikan
+
+**Diselesaikan:**
+- "Buka ulang" di tab Lembar Nilai jadi modal (Batal, ×, Esc, klik luar menutup); popover `<details>` lama tidak bisa ditutup dan terpotong tabel.
+- Fitur Kunci disembunyikan (di-comment di view; route `judgings.lock` dan `CompetitionJudgingService::lock()` tetap ada). Lembar berstatus locked tampil sebagai Terkirim di admin dan panel juri.
+- Review bug aturan antarbabak: (1) hasil babak tidak bisa ditarik dari publik lagi setelah babak berikutnya mulai dinilai; (2) menarik hasil mengosongkan peserta babak berikutnya yang belum dinilai; (3) juri baru tidak bisa ditugaskan ke babak yang sedang dipublikasikan; (4) babak yang dipublikasikan sebelum semua juri selesai memberi arahan "tarik dulu", bukan "tunggu juri".
+- 506 test lolos, 5 skipped.
+
+---
+
+## 2026-11-18 — Status selesai dinilai, urutan peserta per peringkat, perbaikan bug
+
+**Diselesaikan:**
+- Bug: route keluarkan peserta dari babak tidak mengecek kategori (nama peserta lomba lain bocor di pesan) → 404. Tim yang pindah kategori sekarang keluar dari babak lanjutan kategori lama.
+- Juri kembali ke daftar peserta setelah Simpan Draft / Kirim Skor Final.
+- "Pilih manual" dan chip peserta babak diurutkan menurut peringkat babak sebelumnya (badge peringkat; daftar pilih juga menampilkan nilai).
+- Babak "selesai dinilai" (semua juri kirim untuk semua peserta): label status, form Tugaskan juri disembunyikan dan ditolak server; peserta babak berikutnya baru bisa dipilih setelah babak sebelumnya selesai (placeholder "masih berlangsung" + progres lembar).
+- Peserta babak berikutnya baru bisa dipilih setelah babak sebelumnya selesai dinilai dan dipublikasikan (placeholder + ditolak server).
+- Tambah peserta ke babak lanjutan: hanya dari peserta babak sebelumnya; ditolak kalau babak berikutnya sudah dinilai atau hasilnya sedang publik; peserta baru mengosongkan daftar peserta babak sesudahnya (yang belum dinilai).
+- Data lokal: babak lama "Kejuaraan LKBB Nusantara Piala Garuda" dihapus, 10 peserta dummy ditambah, nilai Babak I diisi untuk kedua juri.
+- 504 test lolos, 5 skipped.
+
+---
+
+## 2026-11-17 — Celah keamanan, konfirmasi SweetAlert, peringkat tunggu semua juri
+
+**Diselesaikan:**
+- Celah: teks `confirm()` inline rusak (dan bisa XSS) kalau nama mengandung tanda kutip; juri masih bisa kirim nilai setelah hasil dipublikasikan (`assertOpen()`); ganti kode akses sekarang mengeluarkan sesi juri yang masuk dengan kode lama (fingerprint kode di sesi). Batas login juri dinaikkan ke 10×/menit per IP (juri satu venue berbagi IP).
+- Semua 24 konfirmasi pakai modal ala SweetAlert global (`resources/js/confirm-dialog.js`, atribut `data-confirm*` di form/tombol). Fokus awal di Batal.
+- Publikasikan: popup menyebut lembar yang belum dikirim dan peserta yang belum dinilai semua juri; notifikasi sukses menyebut jumlah peserta yang diperingkat.
+- "Belum diperingkat": ringkasan per juri, satu baris per peserta, 5 pertama lalu "Tampilkan semua" (scroll di dalam kartu).
+- **Aturan peringkat diubah:** peserta baru diperingkat setelah semua juri yang ditugaskan mengirim/mengunci lembarnya (SRS Keputusan D). Hasil yang sudah tersimpan baru berubah saat dihitung ulang/dipublikasikan ulang.
+- Link hasil publik per kategori: `/info-lomba/{slug}/hasil/{category}` (id kategori; 404 kalau bukan milik lomba itu atau belum punya babak). Halaman publik punya pilihan kategori; blok "Link hasil publik" di admin menampilkan link semua kategori + satu per kategori. Script tombol tema di halaman hasil tidak error lagi kalau tombolnya tidak ada.
+- Admin penjurian: tab kategori di bawah tab utama, berlaku di keempat tab (`?kategori=id`, ikut terbawa saat pindah tab dan setelah simpan). Form tambah peserta/babak memakai kategori aktif.
+- Halaman hasil publik: satu babak per kategori dengan pilihan babak; default babak terakhir yang dipublikasikan; link per babak `/hasil/{category}/{round}`. Pilihan kategori di halaman publik sengaja dikomentari (oleh user) dan dibiarkan.
+- **Peserta per babak:** babak pertama = semua peserta kategori; babak berikutnya dipilih admin (manual atau "ambil N teratas dari babak sebelumnya", seri di batas ikut). Tabel baru `competition_round_participants` (+ backfill dari lembar yang sudah ada). Keluarkan peserta ditolak kalau sudah dinilai. Juri, peringkat, lembar nilai, dan "Belum diperingkat" hanya memakai peserta babak itu (SRS Keputusan I).
+- Tab Lembar Nilai dan Hasil: babak yang sudah dipublikasikan tampil ringkas (Lembar: lembar terkirim/dikunci; Hasil: 3 besar), "Tampilkan detail" untuk membuka. Babak yang masih berlangsung tetap terbuka penuh. Tab Babak & Juri tidak diringkas, hanya diberi label "Selesai · hasil diumumkan".
+- Seeder baru `CompetitionMultiRoundDemoSeeder` (Garuda Muda Cup: Grup → Penyisihan → Final per kategori).
+- Seeder baru `CompetitionManyParticipantsDemoSeeder` (SMP Garuda Muda Cup jadi 44 peserta).
+- 499 test lolos, 5 skipped.
+
+**Catatan:** Modul juri lama (`/judge`) kemungkinan punya celah sesi yang sama (kode akses diganti, sesi tetap jalan); belum disentuh.
+
+---
+
 ## 2026-11-17 — Kriteria terkunci total setelah penilaian dimulai
 
 **Diselesaikan:**

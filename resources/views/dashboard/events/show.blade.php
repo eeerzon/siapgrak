@@ -125,7 +125,7 @@
                 <x-ui.card class="mb-4">
                     <p class="text-sm text-slate-700">
                         <span class="font-medium">Pendaftaran:</span>
-                        {{ $event->registration_start_at?->format('j M Y') ?? '—' }} s/d {{ $event->registration_end_at?->format('j M Y') ?? '—' }}
+                        {{ $event->registration_start_at?->translatedFormat('j M Y') ?? '—' }} s/d {{ $event->registration_end_at?->translatedFormat('j M Y') ?? '—' }}
                         — {{ $event->registrations_count }} terdaftar,
                         {{ $registrationCounts['approved'] ?? 0 }} disetujui,
                         {{ $registrationCounts['submitted'] ?? 0 }} menunggu,

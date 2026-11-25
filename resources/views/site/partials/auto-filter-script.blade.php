@@ -12,8 +12,9 @@
             });
         });
 
+        // Unnamed fields (e.g. the search box inside a dropdown) are not filters.
         form.addEventListener('change', (event) => {
-            if (event.target !== search) form.requestSubmit();
+            if (event.target.name && event.target !== search) form.requestSubmit();
         });
 
         // Reloading moves focus away, so remember it and put the caret back after typing-triggered searches.

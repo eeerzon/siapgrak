@@ -26,8 +26,8 @@ class TeamController extends Controller
             ->whereIn('organization_id', $organizationIds)
             ->with('organization')
             ->withCount('members')
-            ->when($request->filled('search'), fn ($query) => $query->where('name', 'like', '%'.$request->string('search').'%'))
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->when($this->queryText($request, 'search'), fn ($query, $search) => $query->whereRaw("name like ? escape '!'", [$this->containsPattern($search)]))
+            ->when($this->queryText($request, 'status'), fn ($query, $status) => $query->where('status', $status))
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();

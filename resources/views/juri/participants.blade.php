@@ -43,7 +43,7 @@
                             <span class="block truncate text-xs text-slate-500">{{ $participant->institution }}</span>
                         @endif
                     </span>
-                    @include('judge.partials.sheet-chip', ['status' => $sheet?->status, 'scored' => $sheet?->scores_count ?? 0, 'total' => $round->criteria_count])
+                    @include('judge.partials.sheet-chip', ['status' => $sheet?->status === \App\Enums\ScoreSheetStatus::Locked ? \App\Enums\ScoreSheetStatus::Submitted : $sheet?->status /* lock hidden for now: shown as sent */, 'scored' => $sheet?->scores_count ?? 0, 'total' => $round->criteria_count])
                 </a>
             @endforeach
         </div>

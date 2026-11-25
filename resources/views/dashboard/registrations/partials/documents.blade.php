@@ -54,7 +54,7 @@
                        class="text-sm font-medium text-sky-700 hover:underline">Unduh</a>
                     @if ($canManage)
                         <form method="POST" action="{{ route('dashboard.registrations.documents.destroy', [$registration, $document]) }}"
-                              class="ml-3 inline" onsubmit="return confirm('Hapus dokumen ini?');">
+                              class="ml-3 inline" data-confirm-title="Hapus dokumen?" data-confirm="Dokumen yang sudah dihapus tidak bisa dikembalikan." data-confirm-button="Ya, hapus">
                             @csrf @method('DELETE')
                             <button type="submit" class="cursor-pointer text-sm font-medium text-red-600 hover:underline">Hapus</button>
                         </form>

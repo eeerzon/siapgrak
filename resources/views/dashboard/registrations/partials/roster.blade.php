@@ -38,7 +38,7 @@
                 @if ($canManage)
                     <x-ui.table-td align="right">
                         <form method="POST" action="{{ route('dashboard.registrations.members.destroy', [$registration, $member]) }}"
-                              onsubmit="return confirm('Hapus anggota ini dari roster pendaftaran?');">
+                              data-confirm-title="Hapus anggota?" data-confirm="Anggota ini akan dikeluarkan dari roster pendaftaran." data-confirm-button="Ya, hapus">
                             @csrf @method('DELETE')
                             <button type="submit" class="cursor-pointer text-sm font-medium text-red-600 hover:underline">Hapus</button>
                         </form>

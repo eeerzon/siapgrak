@@ -32,8 +32,8 @@
         </x-ui.card>
     </div>
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-3">
-        <div class="lg:col-span-2">
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="min-w-0 lg:col-span-2">
             <div class="mb-3 flex items-center justify-between">
                 <h2 class="text-sm font-semibold text-slate-700">Lomba Terdekat</h2>
                 <a href="{{ route('dashboard.content.competitions.index') }}" class="text-sm text-sky-700 hover:underline">Lihat semua</a>
@@ -44,7 +44,7 @@
                 <x-ui.card :padding="false" class="divide-y divide-slate-100">
                     @foreach ($upcomingCompetitions as $competition)
                         <a href="{{ route('dashboard.content.competitions.show', $competition) }}" class="flex items-start justify-between gap-3 px-4 py-3 hover:bg-slate-50">
-                            <div class="min-w-0">
+                            <div class="min-w-0 flex-1">
                                 <p class="truncate font-medium text-slate-800">{{ $competition->title }}</p>
                                 <p class="mt-0.5 text-sm text-slate-500">
                                     <x-site.date-range :start="$competition->start_date" :end="$competition->end_date" />
@@ -80,7 +80,7 @@
                 <x-ui.card :padding="false" class="divide-y divide-slate-100">
                     @foreach ($upcomingAgenda as $agendaItem)
                         <a href="{{ route('dashboard.content.agenda.edit', $agendaItem) }}" class="block px-4 py-3 hover:bg-slate-50">
-                            <p class="text-sm font-medium text-slate-700">{{ $agendaItem->title }}</p>
+                            <p class="truncate text-sm font-medium text-slate-700">{{ $agendaItem->title }}</p>
                             <p class="mt-0.5 text-xs text-slate-400">{{ $agendaItem->start_at->translatedFormat('j M Y, H:i') }}@if ($agendaItem->location) · {{ $agendaItem->location }}@endif</p>
                         </a>
                     @endforeach

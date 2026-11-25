@@ -29,7 +29,7 @@ class ScoringController extends Controller
             ->get()
             ->each(function (CompetitionRound $round) use ($judge): void {
                 $round->setAttribute('ready', $this->judging->isReadyForJudging($round));
-                $round->setAttribute('participants_count', CompetitionParticipant::where('competition_category_id', $round->competition_category_id)->count());
+                $round->setAttribute('participants_count', $this->judging->entrants($round)->count());
                 $round->setAttribute('sent_count', $round->judgings()
                     ->where('competition_judge_id', $judge->id)
                     ->whereIn('status', [ScoreSheetStatus::Submitted, ScoreSheetStatus::Locked])
@@ -46,7 +46,8 @@ class ScoringController extends Controller
 
         $round->load('category.competition')->loadCount('criteria');
         $sheets = $round->judgings()->where('competition_judge_id', $judge->id)->withCount('scores')->get()->keyBy('competition_participant_id');
-        $participants = $round->category->participants()->get();
+        // Only the teams taking part in this round (all of the category in the first round).
+        $participants = $this->judging->entrants($round);
 
         $ready = $this->judging->isReadyForJudging($round);
 
@@ -69,7 +70,7 @@ class ScoringController extends Controller
     {
         $judge = $this->judge($request);
         // Before judgingFor(): a rejected save must not leave a sheet that freezes the criteria.
-        $this->judging->assertReady($round);
+        $this->judging->assertOpen($round);
         $judging = $this->judging->judgingFor($round, $participant, $judge);
 
         $rules = ['scores' => ['array']];
@@ -89,21 +90,30 @@ class ScoringController extends Controller
         if ($request->boolean('kirim')) {
             $this->judging->submit($judging->refresh());
 
-            return redirect()->route('juri.score.show', [$round, $participant])->with('success', 'Nilai terkirim ke panitia.');
+            return $this->backToList($round, "Nilai {$participant->name} terkirim ke panitia.");
         }
 
-        return redirect()->route('juri.score.show', [$round, $participant])->with('success', 'Draft nilai tersimpan.');
+        return $this->backToList($round, "Draft nilai {$participant->name} tersimpan.");
     }
 
     public function submit(Request $request, CompetitionRound $round, CompetitionParticipant $participant): RedirectResponse
     {
         $judge = $this->judge($request);
-        $this->judging->assertReady($round);
+        $this->judging->assertOpen($round);
         $judging = $this->judging->judgingFor($round, $participant, $judge);
 
         $this->judging->submit($judging);
 
-        return redirect()->route('juri.score.show', [$round, $participant])->with('success', 'Nilai terkirim ke panitia.');
+        return $this->backToList($round, "Nilai {$participant->name} terkirim ke panitia.");
+    }
+
+    /**
+     * After saving, the judge goes back to the round's team list to pick the next team.
+     * (Validation errors still return to the score form, via the usual redirect back.)
+     */
+    private function backToList(CompetitionRound $round, string $message): RedirectResponse
+    {
+        return redirect()->route('juri.round', $round)->with('success', $message);
     }
 
     private function judge(Request $request): CompetitionJudge

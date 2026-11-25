@@ -6,11 +6,12 @@ use App\Enums\CompetitionLevel;
 use App\Http\Controllers\Controller;
 use App\Models\CompetitionListing;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class CompetitionController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         $showPast = $request->boolean('arsip');
 
@@ -29,11 +30,22 @@ class CompetitionController extends Controller
             ->paginate(8)
             ->withQueryString();
 
+        if ($redirect = $this->redirectPastLastPage($competitions)) {
+            return $redirect;
+        }
+
+        // Only provinces that have a competition on this tab, so picking one never gives an empty list.
+        // The chosen one stays in the list even when it has none left (e.g. after switching tabs).
         $provinces = CompetitionListing::published()
-            ->whereNotNull('province')
+            ->when($showPast, fn ($query) => $query->past(), fn ($query) => $query->upcoming())
+            ->whereIn('province', config('siapgrak.provinces'))
             ->distinct()
-            ->orderBy('province')
-            ->pluck('province');
+            ->pluck('province')
+            ->push($filters['province'])
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
         $isFiltered = collect($filters)->filter()->isNotEmpty();
 

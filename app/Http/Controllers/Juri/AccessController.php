@@ -31,13 +31,14 @@ class AccessController extends Controller
 
         $request->session()->regenerate();
         $request->session()->put(EnsureCompetitionJudgeSession::SESSION_KEY, $judge->id);
+        $request->session()->put(EnsureCompetitionJudgeSession::CODE_KEY, EnsureCompetitionJudgeSession::fingerprint($judge));
 
         return redirect()->route('juri.dashboard');
     }
 
     public function destroy(Request $request): RedirectResponse
     {
-        $request->session()->forget(EnsureCompetitionJudgeSession::SESSION_KEY);
+        $request->session()->forget([EnsureCompetitionJudgeSession::SESSION_KEY, EnsureCompetitionJudgeSession::CODE_KEY]);
         $request->session()->regenerate();
 
         return redirect()->route('juri.access.create');

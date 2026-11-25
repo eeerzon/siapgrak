@@ -52,9 +52,12 @@ trait IsPublicContent
      */
     public function scopeSearch(Builder $query, ?string $term, array $columns): void
     {
+        // "%" and "_" typed by a visitor are literal characters, not wildcards (otherwise "%" matches everything).
+        // "!" as escape character because SQLite has no default one; the same clause works on MySQL.
         $query->when($term, fn (Builder $query, string $term) => $query->where(function (Builder $query) use ($term, $columns): void {
+            $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term).'%';
             foreach ($columns as $column) {
-                $query->orWhere($column, 'like', "%{$term}%");
+                $query->orWhereRaw($query->getGrammar()->wrap($column)." like ? escape '!'", [$pattern]);
             }
         }));
     }

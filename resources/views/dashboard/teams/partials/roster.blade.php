@@ -31,7 +31,7 @@
                 @if ($manageable)
                     <x-ui.table-td align="right">
                         <form method="POST" action="{{ route('dashboard.teams.members.destroy', [$team, $member]) }}"
-                              onsubmit="return confirm('Hapus anggota ini dari roster?');">
+                              data-confirm-title="Hapus anggota dari roster?" data-confirm="Anggota ini akan dikeluarkan dari roster tim." data-confirm-button="Ya, hapus">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="cursor-pointer text-sm font-medium text-red-600 hover:underline">Hapus</button>

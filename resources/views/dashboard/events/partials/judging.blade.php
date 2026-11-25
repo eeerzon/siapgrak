@@ -82,7 +82,7 @@
                                         </div>
                                         @can('manageJudging', $event)
                                             <form method="POST" action="{{ route('dashboard.judging-rounds.destroy', $round) }}"
-                                                  onsubmit="return confirm('Hapus round ini beserta semua kriterianya?');">
+                                                  data-confirm-title="Hapus round ini?" data-confirm="Semua kriteria di round ini ikut terhapus." data-confirm-button="Ya, hapus">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="cursor-pointer text-xs font-medium text-red-600 hover:underline">Hapus Round</button>
                                             </form>
@@ -113,7 +113,7 @@
                                                             <div class="flex shrink-0 items-center gap-2 text-xs">
                                                                 <button type="button" @click="open = true; editing = {{ $criterion->id }}" class="cursor-pointer font-medium text-sky-700 hover:underline">Edit</button>
                                                                 <form method="POST" action="{{ route('dashboard.judging-criteria.destroy', $criterion) }}"
-                                                                      onsubmit="return confirm('Hapus kriteria ini?');">
+                                                                      data-confirm-title="Hapus kriteria ini?" data-confirm="Kriteria yang sudah dihapus tidak bisa dikembalikan." data-confirm-button="Ya, hapus">
                                                                     @csrf @method('DELETE')
                                                                     <button type="submit" class="cursor-pointer text-red-600 hover:underline">Hapus</button>
                                                                 </form>
@@ -133,7 +133,7 @@
                                                                         <span class="flex shrink-0 items-center gap-2">
                                                                             <button type="button" @click="open = true; editing = {{ $child->id }}" class="cursor-pointer font-medium text-sky-700 hover:underline">Edit</button>
                                                                             <form method="POST" action="{{ route('dashboard.judging-criteria.destroy', $child) }}"
-                                                                                  onsubmit="return confirm('Hapus kriteria ini?');">
+                                                                                  data-confirm-title="Hapus kriteria ini?" data-confirm="Kriteria yang sudah dihapus tidak bisa dikembalikan." data-confirm-button="Ya, hapus">
                                                                                 @csrf @method('DELETE')
                                                                                 <button type="submit" class="cursor-pointer text-red-600 hover:underline">Hapus</button>
                                                                             </form>
@@ -166,7 +166,7 @@
                                                         </span>
                                                         @can('manageJudging', $event)
                                                             <form method="POST" action="{{ route('dashboard.judge-assignments.destroy', $assignment) }}"
-                                                                  onsubmit="return confirm('Lepas penugasan juri ini?');">
+                                                                  data-confirm-title="Lepas penugasan juri?" data-confirm="Juri ini tidak lagi bertugas di round tersebut." data-confirm-button="Ya, lepas" data-confirm-icon="warning">
                                                                 @csrf @method('DELETE')
                                                                 <button type="submit" class="cursor-pointer text-xs text-red-600 hover:underline">Lepas</button>
                                                             </form>

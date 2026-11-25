@@ -31,7 +31,7 @@ class EventRegistrationController extends Controller
         $registrations = $event->registrations()
             ->with(['team', 'category', 'entry', 'documents'])
             ->withCount('members')
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->when($this->queryText($request, 'status'), fn ($query, $status) => $query->where('status', $status))
             ->when($request->filled('category'), fn ($query) => $query->where('event_category_id', $request->integer('category')))
             ->latest('id')
             ->paginate(20)

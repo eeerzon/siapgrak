@@ -59,7 +59,7 @@
 
                     @can('manageCategories', $event)
                         <form method="POST" action="{{ route('dashboard.events.categories.destroy', [$event, $category]) }}"
-                              onsubmit="return confirm('Hapus kategori ini?');" class="mt-3">
+                              data-confirm-title="Hapus kategori ini?" data-confirm="Kategori yang sudah dihapus tidak bisa dikembalikan." data-confirm-button="Ya, hapus" class="mt-3">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="cursor-pointer text-sm font-medium text-red-600 hover:underline">Hapus</button>

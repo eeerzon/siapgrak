@@ -19,10 +19,13 @@ trait ScopesToCompetition
         abort_unless($listingId === $competition->id, 404);
     }
 
-    protected function backToTab(CompetitionListing $competition, string $tab, string $message): RedirectResponse
+    /**
+     * @param  array<string, int|string>  $query  extra query, e.g. ['kategori' => 2] to reopen a category tab
+     */
+    protected function backToTab(CompetitionListing $competition, string $tab, string $message, array $query = []): RedirectResponse
     {
         return redirect()
-            ->route('dashboard.content.competitions.judging.show', [$competition, 'tab' => $tab])
+            ->route('dashboard.content.competitions.judging.show', [$competition, 'tab' => $tab, ...$query])
             ->with('success', $message);
     }
 }

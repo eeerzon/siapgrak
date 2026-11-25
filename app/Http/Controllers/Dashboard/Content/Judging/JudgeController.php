@@ -19,7 +19,7 @@ class JudgeController extends Controller
     {
         $search = $this->queryText($request, 'q');
         $judges = CompetitionJudge::ownedBy($request->user())
-            ->when($search, fn ($query) => $query->where('name', 'like', "%{$search}%"))
+            ->when($search, fn ($query) => $query->whereRaw("name like ? escape '!'", [$this->containsPattern($search)]))
             ->withCount('rounds')
             ->orderBy('name')
             ->get();

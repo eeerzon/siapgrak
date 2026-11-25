@@ -4,7 +4,6 @@
 
 @php
     $filterQuery = request()->only(['q', 'jenjang', 'provinsi', 'buka']);
-    $fieldClass = 'block w-full rounded-md border border-slate-300 bg-white py-2 text-sm';
 @endphp
 
 @section('content')
@@ -20,25 +19,15 @@
             @if ($showPast)
                 <input type="hidden" name="arsip" value="1">
             @endif
-            @include('site.partials.search-field', ['value' => $filters['q'], 'placeholder' => 'Cari nama lomba, penyelenggara, atau kota'])
-            <div>
-                <label for="jenjang" class="sr-only">Jenjang</label>
-                <select id="jenjang" name="jenjang" class="{{ $fieldClass }} pr-10 pl-3">
-                    <option value="">Semua jenjang</option>
-                    @foreach (App\Enums\CompetitionLevel::cases() as $level)
-                        <option value="{{ $level->value }}" @selected($filters['level'] === $level)>{{ $level->label() }}</option>
-                    @endforeach
-                </select>
+            <div class="sm:col-span-2 lg:col-span-1">
+                @include('site.partials.search-field', ['value' => $filters['q'], 'placeholder' => 'Cari lomba, penyelenggara, atau kota'])
             </div>
-            <div>
-                <label for="provinsi" class="sr-only">Provinsi</label>
-                <select id="provinsi" name="provinsi" class="{{ $fieldClass }} pr-10 pl-3">
-                    <option value="">Semua provinsi</option>
-                    @foreach ($provinces as $province)
-                        <option value="{{ $province }}" @selected($filters['province'] === $province)>{{ $province }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-ui.combobox name="jenjang" sr-label="Jenjang" :searchable="false"
+                :value="$filters['level']?->value"
+                :options="['' => 'Semua jenjang'] + collect(App\Enums\CompetitionLevel::cases())->mapWithKeys(fn ($level) => [$level->value => $level->label()])->all()" />
+            <x-ui.combobox name="provinsi" sr-label="Provinsi" search-placeholder="Cari provinsi..."
+                :value="$filters['province']"
+                :options="['' => 'Semua provinsi'] + collect($provinces)->mapWithKeys(fn ($province) => [$province => $province])->all()" />
             <div class="flex items-center gap-3 sm:col-span-2 lg:col-span-1">
                 @unless ($showPast)
                     <label class="flex cursor-pointer items-center gap-2 text-sm whitespace-nowrap text-slate-600">
